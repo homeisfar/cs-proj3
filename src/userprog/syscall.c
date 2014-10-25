@@ -354,15 +354,13 @@ sys_read (int fd, void *buffer, unsigned size)
 	struct thread *t;
 	t = thread_current ();
 	int bytes_read = 0;
-  int key = 0;
-	if (fd == 0)
-		{ 
-			while (bytes_read < (int) size) 
-				{
-					key = input_getc ();
-					bytes_read++;
-				}
-		}
+  char string_from_key;
+  if (fd == 0)
+    {
+      char *strbuf = buffer;
+      while (bytes_read < size)
+        strbuf[bytes_read++] = input_getc ();
+    }
     else if (fd == 1)
       sys_exit (-1);
     else if ((fd = valid_index (fd)) >= 0)

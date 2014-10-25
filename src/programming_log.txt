@@ -142,6 +142,11 @@ Charling, 30 minutes
 Ali, 30 minutes
 
 10/21 2:30p - 6:00p Ali, Brandon 3.50 hours
-Ali, 1.75 hours
-Brandon, 1.75 hours
-50/50%
+Ali, 30 mins
+Brandon, 30 mins
+Ali, 30 mins
+Brandon, 30 mins
+Ali, 30 mins
+Brandon, 30 mins
+Ali, 30 mins
+
