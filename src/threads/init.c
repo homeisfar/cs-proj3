@@ -38,6 +38,9 @@
 #include "filesys/fsutil.h"
 #endif
 
+// Student code
+#include "vm/frame.h"
+
 /* Page directory with kernel mappings only. */
 uint32_t *init_page_dir;
 
@@ -98,6 +101,9 @@ main (void)
   palloc_init (user_page_limit);
   malloc_init ();
   paging_init ();
+
+  //Student code
+  init_frame_table ();
 
   /* Segmentation. */
 #ifdef USERPROG
