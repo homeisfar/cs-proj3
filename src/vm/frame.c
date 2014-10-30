@@ -19,16 +19,19 @@
 #include "threads/vaddr.h"
 #include "threads/loader.h"
 
+/* Student code */
 #include "vm/page.h"
 #include <bitmap.h>
 #include "vm/frame.h"
 
+/* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
-/* create a frame table that has 2^20 frame entries,
+
+/* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 static frame_entry *frame_table;
-void *frame_get_page(enum palloc_flags);
-void *frame_get_multiple(enum palloc_flags, size_t);
+void *frame_get_page (enum palloc_flags);
+void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
 void frame_free_page (void *);
 
@@ -41,19 +44,22 @@ void frame_free_page (void *);
 //based on this PDE -> PTE -> P madness!
 
 
-/* initialize the elements of the frame table */
+/* Initialize the elements of the frame table allocating and clearing a
+   set of memory */
 void
 init_frame_table ()
 {
 	frame_table = calloc (FRAME_MAX, sizeof (frame_entry));
 }
 
+/* Obtain a single frame */
 void *
 frame_get_page (enum palloc_flags flags)
 {
 	return frame_get_multiple (flags, 1);
 }
 
+/* Obtain size number of frames */
 void *
 frame_get_multiple (enum palloc_flags flags, size_t size)
 {
@@ -64,10 +70,11 @@ frame_get_multiple (enum palloc_flags flags, size_t size)
 	// printf ("The value of the page is: %p\n\n", page);
 	// printf ("The value of the division is: %d\n\n", ((uintptr_t)page - (uintptr_t)free_start)/PGSIZE);
 	for(offset = 0; offset < size; offset++)
-		frame_table[((uintptr_t)page - (uintptr_t)free_start)/PGSIZE + offset].page = page;
+		frame_table[((uintptr_t) page - (uintptr_t) free_start) / PGSIZE + offset].page = page;
 	return page;
 }
 
+/* Free page_cnt number of frames from memory */
 void
 frame_free_multiple (void *pages, size_t page_cnt) 
 {
@@ -78,12 +85,15 @@ frame_free_multiple (void *pages, size_t page_cnt)
 	palloc_free_multiple (pages, page_cnt);
 }
 
+/* Free a single frame from memory */
 void
 frame_free_page (void *page) 
 {
 	frame_free_multiple (page, 1);
 }
 
+/* Retreive the next free available page from the frame table, starting from
+   the passed starting integer */
 int
 next_free_entry (int start)
 {

@@ -1,11 +1,8 @@
 #ifndef VM_FRAME_H
 #define VM_FRAME_H
 
-
-/* A 
-/* Create a frame entry that contains the
-   pointer to a page in physical memory and
-   contains the page element */
+/* Create a frame entry that contains the pointer to a page in physical
+   memory and contains the page element */
 struct frame_entry
 {
   // uint32_t *page_ptr;
