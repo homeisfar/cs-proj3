@@ -10,4 +10,5 @@ struct frame_entry
   void *page;
 } typedef frame_entry;
 
+extern frame_entry *frame_table;
 #endif /* vm/frame.h */

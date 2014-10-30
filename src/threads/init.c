@@ -40,6 +40,7 @@
 
 // Student code
 #include "vm/frame.h"
+#include "vm/page.h"
 
 /* Page directory with kernel mappings only. */
 uint32_t *init_page_dir;
@@ -104,6 +105,7 @@ main (void)
 
   //Student code
   init_frame_table ();
+  init_supp_page_dir ();
 
   /* Segmentation. */
 #ifdef USERPROG

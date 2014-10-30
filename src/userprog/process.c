@@ -103,6 +103,12 @@ start_process (void *file_name_)
     if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
     if_.cs = SEL_UCSEG;
     if_.eflags = FLAG_IF | FLAG_MBS;
+    
+    // init file descriptor table
+    struct thread *t = thread_current();
+    t->fds = palloc_get_page(PAL_ZERO);
+    memset (t->fds, 0, FDMAX*sizeof (struct file *));
+
     success = load (file_name, &if_.eip, &if_.esp);
     struct thread *current = thread_current();
 
@@ -180,6 +186,8 @@ process_exit (void)
         pagedir_activate (NULL);
         pagedir_destroy (pd);
     }
+    // free file descriptor table
+    palloc_free_page(cur->fds);
 }
 
 /* Sets up the CPU for running user code in the current

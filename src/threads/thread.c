@@ -213,7 +213,7 @@ thread_create (const char *name, int priority,
   /* Add child thread to parent's child list */
   list_push_back(&thread_current ()->child_list, &t->child_elem);
   t->parent = thread_current();
-
+  
   intr_set_level (old_level);
 
   /* Add to run queue. */
@@ -510,7 +510,6 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init (&t->sys_wait_sema, 0);
   sema_init (&t->sys_wait_reap, 0);
   t->fd_size = 0;
-  memset (t->fds, 0, FDMAX*sizeof (struct file *));
 
   list_push_back (&all_list, &t->allelem);
 }

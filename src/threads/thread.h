@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "synch.h"
+#include "vaddr.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -25,7 +26,7 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
-#define FDMAX 128                       /* Max value of fd table */
+#define FDMAX PGSIZE / sizeof(struct file *) /* Max value of fd table */
 
 /* A kernel thread or user process.
 
@@ -147,10 +148,12 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+    // pagedir metadata
+    // void *so_meta_wow;
 #endif
 
     /* File Struct for File Descriptors */
-    struct file *fds[FDMAX];
+    struct file **fds;
     struct file *self_executable;
     uint32_t fd_size;
     

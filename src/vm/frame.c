@@ -29,7 +29,7 @@
 
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
-static frame_entry *frame_table;
+frame_entry *frame_table;
 void *frame_get_page (enum palloc_flags);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
