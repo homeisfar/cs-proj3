@@ -7,7 +7,12 @@ struct frame_entry
 {
   // uint32_t *page_ptr;
   // struct page_entry *page;
+  void *phys_page;
+  page_entry *page_dir_entry;
   void *page;
+
+  // int index;
+  // struct thread * | char *page_dir_base;
 } typedef frame_entry;
 
 extern frame_entry *frame_table;

@@ -18,6 +18,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "vm/page.h"
+#include "lib/kernel/hash.h"
 
 #define PAGE_DIR_MAX 1 << 10
 
@@ -30,4 +31,22 @@ void init_supp_page_dir()
 {
     // page_dir_supp = calloc(PAGE_DIR_MAX, sizeof (uint32_t *));
     page_dir_supp = calloc(1 << 10, sizeof (page_dir));
+}
+
+unsigned
+page_hash (const struct hash_elem *p_, void *aux UNUSED)
+{
+  const struct page_entry *p = hash_entry (p_, struct page_entry, page_elem);
+  return hash_bytes (&p->vaddr, sizeof p->vaddr);
+}
+
+/* Returns true if page a precedes page b. */
+bool
+page_less (const struct hash_elem *a_, const struct hash_elem *b_,
+           void *aux UNUSED)
+{
+  const struct page_entry *a = hash_entry (a_, struct page_entry, page_elem);
+  const struct page_entry *b = hash_entry (b_, struct page_entry, page_elem);
+
+  return a->vaddr < b->vaddr;
 }

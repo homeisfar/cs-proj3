@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include "synch.h"
 #include "vaddr.h"
+#include "vm/page.h"
+#include "lib/kernel/hash.h"
+#include <bitmap.h>
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -151,6 +154,10 @@ struct thread
     // pagedir metadata
     // void *so_meta_wow;
 #endif
+
+    /* Pointer to Supplemental Page Table */
+    struct hash page_table_supp;
+    struct bitmap *vpage_bitmap;
 
     /* File Struct for File Descriptors */
     struct file **fds;
