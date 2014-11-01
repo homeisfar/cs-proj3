@@ -25,6 +25,19 @@
 // uint32_t **page_dir_supp;
 page_dir *page_dir_supp;
 
+
+//still needed to do 4:14PM Nov 1st
+/*
+Use bitmap to scan for available pages and contiguous regions of memory
+Create functions to create entry in Supp table (and set bits on bitmap)
+Create function to remove entry from supp table and unset bits
+
+//METADATA TO KEEP TRACK OF:
+
+
+
+*/
+
 void init_supp_page_dir();
 
 void init_supp_page_dir()
@@ -49,4 +62,13 @@ page_less (const struct hash_elem *a_, const struct hash_elem *b_,
   const struct page_entry *b = hash_entry (b_, struct page_entry, page_elem);
 
   return a->vaddr < b->vaddr;
+}
+
+page_entry *
+get_page_entry (struct hash *page_table, void *fault_addr)
+{
+  page_entry pe;
+  pe.vaddr = fault_addr;
+  struct hash_elem *elem = hash_find(page_table, &pe.page_elem);
+  return elem ? hash_entry(elem, page_entry, page_elem) : NULL;
 }

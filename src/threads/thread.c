@@ -513,10 +513,7 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init (&t->sys_wait_sema, 0);
   sema_init (&t->sys_wait_reap, 0);
   t->fd_size = 0;
-  hash_init (&t->page_table_supp, page_hash, page_less, NULL);
-  t->vpage_bitmap = bitmap_create(512);
-  if (!t->vpage_bitmap)
-    PANIC("Virtual page bitmap failed to initialize");
+  
   list_push_back (&all_list, &t->allelem);
 }
 

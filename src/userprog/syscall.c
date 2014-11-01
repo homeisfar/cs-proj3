@@ -216,7 +216,7 @@ sys_exit (int status)
   struct thread *t;
   t = thread_current ();
   t->exit_status = status;
-  int i;
+  uint32_t i;
 
   for (i = 0; i < FDMAX; i++)
     if (t->fds[i])
@@ -286,7 +286,7 @@ sys_open (const char *file)
 {
   struct file *f;
   struct thread *t;
-  int i;
+  uint32_t i;
   t = thread_current();
 
   if(t->fd_size >= FDMAX)
@@ -353,8 +353,7 @@ sys_read (int fd, void *buffer, unsigned size)
 {
 	struct thread *t;
 	t = thread_current ();
-	int bytes_read = 0;
-  char string_from_key;
+	uint32_t bytes_read = 0;
   if (fd == 0)
     {
       char *strbuf = buffer;
@@ -540,7 +539,7 @@ int
 valid_index (int fd)
 {
   fd -= 2;
-  if( fd < FDMAX && fd >= 0 )
+  if( fd < (int)FDMAX && fd >= 0 )
     return fd;
   else
     return -1;

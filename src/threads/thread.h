@@ -29,7 +29,7 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
-#define FDMAX PGSIZE / sizeof(struct file *) /* Max value of fd table */
+#define FDMAX PGSIZE / sizeof (struct file *) /* Max value of fd table */
 
 /* A kernel thread or user process.
 

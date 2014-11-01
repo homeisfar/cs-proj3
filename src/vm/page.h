@@ -2,15 +2,18 @@
 #define VM_PAGE_H
 
 #include "lib/kernel/hash.h"
+#include "threads/palloc.h"
 
 #define is_alloc(x) (x & 1)
 #define is_in_frame(x) (x & 2)
+#define is_writeable(x) (x & 4)
 
+#define set_frame(x) (x |= 2)
 /*
 	
 */
 
-struct page_entry{
+typedef struct page_entry{
   // uint32_t * page_ptr;
 	 //  bool dirty_bit = pagedir_is_dirty (pagedir, page);
   // bool reference_bit bad code
@@ -20,15 +23,15 @@ struct page_entry{
 	/*
 		swap meta data
 	*/
-} typedef page_entry;
+} page_entry;
 
 
-struct page_dir 
+typedef struct page_dir 
 {
     // meta-data
     uint32_t *pd;
     page_entry *pages;
-} typedef page_dir;
+} page_dir;
 
 
 
@@ -39,6 +42,9 @@ void vm_free_page (void *);
 void vm_free_multiple (void *, size_t page_cnt);
 
 void init_supp_page_dir();
+
+page_entry *
+get_page_entry (struct hash *, void *);
 
 unsigned
 page_hash (const struct hash_elem *p_, void *aux UNUSED);

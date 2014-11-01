@@ -18,6 +18,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/loader.h"
+#include "threads/malloc.h"
 
 /* Student code */
 #include "vm/page.h"
@@ -30,18 +31,10 @@
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
-void *frame_get_page (enum palloc_flags);
+int frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
-void frame_free_page (void *);
-
-//TODO:
-//create a hash table for every process. This hash table
-//will be reflective of all of virtual memory per process.
-//Since the table grows dynamically, it won't take up too much
-//space. But we may need to figure out how to store that data
-//in the user process stack. Or it may need to exist elsewhere
-//based on this PDE -> PTE -> P madness!
+//uintptr_t *frame_evict_page ();
 
 
 /* Initialize the elements of the frame table allocating and clearing a
@@ -53,25 +46,29 @@ init_frame_table ()
 }
 
 /* Obtain a single frame */
-void *
-frame_get_page (enum palloc_flags flags)
-{
-	return frame_get_multiple (flags, 1);
-}
-
-/* Obtain size number of frames */
-void *
-frame_get_multiple (enum palloc_flags flags, size_t size)
+int
+frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entry)
 {
 	void *page;
 	uint32_t offset;
 	uint8_t *free_start = ptov (1024 * 1024);
-	page = palloc_get_multiple (flags, size);
+	page = palloc_get_page (PAL_USER);
+	if (!page)
+	{
+		page = frame_evict_page();//eviction here
+		// check if page is NULL
+		if (!page)
+			return 0;
+	}
 	// printf ("The value of the page is: %p\n\n", page);
 	// printf ("The value of the division is: %d\n\n", ((uintptr_t)page - (uintptr_t)free_start)/PGSIZE);
-	for(offset = 0; offset < size; offset++)
-		frame_table[((uintptr_t) page - (uintptr_t) free_start) / PGSIZE + offset].page = page;
-	return page;
+	uint32_t index = ((uintptr_t) page - (uintptr_t) free_start) / PGSIZE ;
+	//supplemental_table[index].index = index;
+	// make frame entry point to supplemental page dir entry
+	frame_table[index].page = page;
+	frame_table[index].page_dir_entry = fault_entry;
+	set_frame(frame_table[index].page_dir_entry->meta);
+	return pagedir_set_page (pd, upage, page, writable);
 }
 
 /* Free page_cnt number of frames from memory */
@@ -86,22 +83,27 @@ frame_free_multiple (void *pages, size_t page_cnt)
 }
 
 /* Free a single frame from memory */
-void
-frame_free_page (void *page) 
+uintptr_t *
+frame_evict_page () 
 {
-	frame_free_multiple (page, 1);
+	return NULL;
+	// eviction algorithm goes here
+	// for now, panic/fail
+	// only goes into swap if dirty
+	// pagedir_clear_page (uint32_t *pd, void *upage) 
+
 }
 
 /* Retreive the next free available page from the frame table, starting from
    the passed starting integer */
-int
-next_free_entry (int start)
-{
-	int i = start;
-	while (frame_table[i].page && i < FRAME_MAX)
-		i++;
-	if (i >= FRAME_MAX)
-		return -1;
-	return i;
-}
+// int
+// next_free_entry (int start)
+// {
+// 	uint32_t i = start;
+// 	while (frame_table[i].page && i < FRAME_MAX)
+// 		i++;
+// 	if (i >= FRAME_MAX)
+// 		return -1;
+// 	return i;
+// }
 

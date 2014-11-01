@@ -5,7 +5,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "userprog/syscall.h"
-
+#include "vm/frame.h"
 /* Number of page faults processed. */
 static long long page_fault_cnt;
 
@@ -155,6 +155,18 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
+  struct thread *t = thread_current();
+  page_entry *fault_entry = get_page_entry(&t->page_table_supp, fault_addr);
+  
+  if (!fault_entry) 
+  {
+      kill (f);
+  }
+  
+  bool writeable = is_writeable(fault_entry->meta) ? true : false;
+  if (!frame_get_page(t->pagedir, fault_addr, writeable, fault_entry))
+      kill (f);
+
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
@@ -166,6 +178,6 @@ page_fault (struct intr_frame *f)
 
   printf("There is no crying in Pintos!\n");
 
-  kill (f);
+
 }
 
