@@ -3,6 +3,7 @@
 
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
+#include "lib/kernel/bitmap.h"
 
 #define is_alloc(x) (x & 1)
 #define is_in_frame(x) (x & 2)
@@ -44,7 +45,7 @@ void vm_free_multiple (void *, size_t page_cnt);
 void init_supp_page_dir();
 
 page_entry *
-get_page_entry (struct hash *, void *);
+page_get_entry (struct hash *, void *);
 
 unsigned
 page_hash (const struct hash_elem *p_, void *aux UNUSED);
@@ -53,6 +54,9 @@ page_hash (const struct hash_elem *p_, void *aux UNUSED);
 bool
 page_less (const struct hash_elem *a_, const struct hash_elem *b_,
            void *aux UNUSED);
+
+size_t
+page_obtain_pages (struct bitmap *, size_t, size_t);
 // extern uint32_t **page_dir_supp;
 extern page_dir *page_dir_supp;
 

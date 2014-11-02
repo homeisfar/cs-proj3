@@ -14,11 +14,9 @@
 #include "threads/flags.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
-#include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "vm/page.h"
-#include "lib/kernel/hash.h"
 
 #define PAGE_DIR_MAX 1 << 10
 
@@ -29,12 +27,17 @@ page_dir *page_dir_supp;
 //still needed to do 4:14PM Nov 1st
 /*
 Use bitmap to scan for available pages and contiguous regions of memory
-Create functions to create entry in Supp table (and set bits on bitmap)
+Create function to create entry in Supp table (and set bits on bitmap)
 Create function to remove entry from supp table and unset bits
 
 //METADATA TO KEEP TRACK OF:
+1) Is the memory allocated?
+2) Is the memory in frame?
+3) Is the memory writeable?
 
-
+On thread exits:
+clear page table pagedir_clear_page
+destroy hash table
 
 */
 
@@ -65,10 +68,62 @@ page_less (const struct hash_elem *a_, const struct hash_elem *b_,
 }
 
 page_entry *
-get_page_entry (struct hash *page_table, void *fault_addr)
+page_get_entry (struct hash *page_table, void *fault_addr)
 {
   page_entry pe;
   pe.vaddr = fault_addr;
   struct hash_elem *elem = hash_find(page_table, &pe.page_elem);
   return elem ? hash_entry(elem, page_entry, page_elem) : NULL;
 }
+
+size_t
+page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
+{
+	size_t start_bit;
+	while((start_bit = bitmap_scan_and_flip (page_map, start, cnt, 0)) == BITMAP_ERROR)
+	{
+		//resize bitmap not yet implemented
+	}
+	return start_bit;
+}
+
+// void
+// page_insert_entry (struct hash *hash, struct hash elem)
+// {
+// struct hash_elem *hash_insert (struct hash *, struct hash_elem *);
+
+	/*
+		What we need to insert.
+		1) the hash and hash elem
+		2) to know where the hash elem comes from (the page struct)
+		3) the vaddr to calculate the hash function
+	*/
+
+// }
+
+// struct hash_elem *hash_insert (struct hash *, struct hash_elem *);
+
+// void
+// page_insert_multiple ()
+// {
+
+// }
+
+// void
+// page_remove_entry ()
+// {
+
+// }
+
+// void
+// page_remove_multiple () //more like destroy the table
+// {
+
+// }
+
+
+//resize bitmap function call ()
+
+// struct hash_elem *
+// page_insert (struct hash *, struct hash_elem *);
+
