@@ -7,7 +7,8 @@
 
 #define is_alloc(x) (x & 1)
 #define is_in_frame(x) (x & 2)
-#define is_writeable(x) (x & 4)
+#define is_zeropage(x) (x & 4)
+#define is_writeable(x) (x & 8)
 
 #define set_frame(x) (x |= 2)
 /*
@@ -16,7 +17,7 @@
 
 typedef struct page_entry{
   // uint32_t * page_ptr;
-	 //  bool dirty_bit = pagedir_is_dirty (pagedir, page);
+	 // bool dirty_bit = pagedir_is_dirty (pagedir, page);
   // bool reference_bit bad code
 	void *vaddr;
 	struct hash_elem page_elem;
