@@ -40,8 +40,8 @@ clear page table pagedir_clear_page
 destroy hash table
 
 */
-
 void init_supp_page_dir();
+
 
 void init_supp_page_dir()
 {
@@ -87,43 +87,32 @@ page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
 	return start_bit;
 }
 
-// void
-// page_insert_entry (struct hash *hash, struct hash elem)
-// {
-// struct hash_elem *hash_insert (struct hash *, struct hash_elem *);
+struct hash_elem *
+page_insert_entry ()
+{
+    struct thread *t = thread_current ();
+    struct hash *pages = t->page_table_supp;
+    page_entry *p = t->supp_page_data->pages; //potentially bad
 
-	/*
-		What we need to insert.
-		1) the hash and hash elem
-		2) to know where the hash elem comes from (the page struct)
-		3) the vaddr to calculate the hash function
-	*/
+    //if we insert an entry for the first time we can assume that
+    //the entry hasn't been loaded into a frame yet.
+    //TODO: Modify the bits from page.h
+    //TODO: Palloc here?
 
-// }
+    return hash_insert (&pages, &p->page_elem);
+}
 
-// struct hash_elem *hash_insert (struct hash *, struct hash_elem *);
-
-// void
-// page_insert_multiple ()
-// {
-
-// }
-
-// void
-// page_remove_entry ()
-// {
-
-// }
-
-// void
-// page_remove_multiple () //more like destroy the table
-// {
-
-// }
+struct hash_elem *
+page_remove_entry ()
+{
+    struct thread *t = thread_current ();
+    struct hash *pages = t->page_table_supp;
+    page_entry *p = t->supp_page_data->pages; //potentially bad
+    return hash_delete (&pages, &p->page_elem);
+}
 
 
 //resize bitmap function call ()
 
 // struct hash_elem *
 // page_insert (struct hash *, struct hash_elem *);
-

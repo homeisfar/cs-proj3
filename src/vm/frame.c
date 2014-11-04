@@ -31,7 +31,7 @@
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
-int frame_get_page (uint32_t *, void *, bool , page_entry *);
+int frame_get_page (uint32_t *, void *, bool, page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
 //uintptr_t *frame_evict_page ();
@@ -106,4 +106,3 @@ frame_evict_page ()
 // 		return -1;
 // 	return i;
 // }
-
