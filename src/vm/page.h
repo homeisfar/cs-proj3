@@ -5,19 +5,14 @@
 #include "threads/palloc.h"
 #include "lib/kernel/bitmap.h"
 
-#define is_alloc(x) (x & 1)		/* Tells us if it's in frame or swap */
-#define is_in_frame(x) (x & 6)	/* More specifically, if it is in frame or swap, or zero page. We need 2 bits */
-#define is_writeable(x) (x & 8)	/* Page can be written to. Useful for shared memory */
-#define is_stack(x) (x & 16)	/* Is the page a stack page? For stack growth */
+#define is_alloc(x) (x & 1)
+#define is_in_frame(x) (x & 2)
+#define is_zeropage(x) (x & 4)
+#define is_writeable(x) (x & 8)
 
 #define set_frame(x) (x |= 2)
 /*
-	We also want to keep track in our supp table of:
-
-	Files that are open || struct array?
-	Offsets in said files || uint32 array?
-	Does this information need to be malloc'd and free?
-
+	
 */
 
 typedef struct page_entry{
@@ -33,7 +28,7 @@ typedef struct page_entry{
 } page_entry;
 
 
-typedef struct page_dir
+typedef struct page_dir 
 {
     // meta-data
     uint32_t *pd;

@@ -151,12 +151,12 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-    page_dir *supp_page_data;
+    // pagedir metadata
     // void *so_meta_wow;
 #endif
 
     /* Pointer to Supplemental Page Table */
-    struct hash *page_table_supp;
+    struct hash page_table_supp;
     struct bitmap *vpage_bitmap;
 
     /* File Struct for File Descriptors */
