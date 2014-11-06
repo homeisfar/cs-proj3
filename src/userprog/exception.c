@@ -156,7 +156,7 @@ page_fault (struct intr_frame *f)
   user = (f->error_code & PF_U) != 0;
 
   struct thread *t = thread_current();
-  page_entry *fault_entry = page_get_entry(&t->page_table_supp, fault_addr);
+  page_entry *fault_entry = page_get_entry(&t->page_table_hash, fault_addr);
   
   if (!fault_entry) 
   {

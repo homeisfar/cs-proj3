@@ -109,7 +109,7 @@ start_process (void *file_name_)
     t->fds = palloc_get_page(PAL_ZERO);
     memset (t->fds, 0, FDMAX * sizeof (struct file *));
 
-    hash_init (&t->page_table_supp, page_hash, page_less, NULL);
+    hash_init (&t->page_table_hash, page_hash, page_less, NULL);
     t->vpage_bitmap = bitmap_create(512);
     if (!t->vpage_bitmap)
       PANIC("Virtual page bitmap failed to initialize");
@@ -499,12 +499,25 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-        uint8_t *kpage = palloc_get_page (PAL_USER); //first page fault
+        uint8_t *kpage = palloc_get_page (PAL_USER);
+       
+        page_insert_entry (file, ofs, upage, read_bytes, zero_bytes, writable);
+        struct thread *t = thread_current ();
+        // if(t->supp_page_data->vaddr)
+        // {
+
+
+          page_entry *pagelol = page_get_entry (&t->page_table_hash, t->supp_page_data->vaddr);
+        // printf("<>CALLING LOAD_SEGMENT<>\n");
+        printf("Literally straight outta the hash table: %d\n", pagelol->happy);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////      
+        
+        //TODO: Move this to pagefault handler. Nov 6
         if (kpage == NULL)
             return false;
 

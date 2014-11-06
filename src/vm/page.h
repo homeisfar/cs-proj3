@@ -4,6 +4,8 @@
 #include "lib/kernel/hash.h"
 #include "threads/palloc.h"
 #include "lib/kernel/bitmap.h"
+#include <stdint.h>
+#include <filesys/file.h>
 
 #define is_alloc(x) (x & 1)		/* Tells us if it's in frame or swap */
 #define is_in_frame(x) (x & 6)	/* More specifically, if it is in frame or swap, or zero page. We need 2 bits */
@@ -11,6 +13,7 @@
 #define is_stack(x) (x & 16)	/* Is the page a stack page? For stack growth */
 
 #define set_frame(x) (x |= 2)
+#define set_writeable(x) (x |= 8)
 /*
 	We also want to keep track in our supp table of:
 
@@ -27,18 +30,24 @@ typedef struct page_entry{
 	void *vaddr;
 	struct hash_elem page_elem;
 	uint8_t meta;
+	struct file *f;
+	off_t ofs;
+	uint8_t *upage;
+    uint32_t read_bytes; 
+    uint32_t zero_bytes;
+    int happy;
 	/*
 		swap meta data
 	*/
 } page_entry;
 
 
-typedef struct page_dir
-{
-    // meta-data
-    uint32_t *pd;
-    page_entry *pages;
-} page_dir;
+// typedef struct page_dir
+// {
+//     // meta-data
+//     uint32_t *pd;
+//     page_entry *pages;
+// } page_dir;
 
 
 
@@ -47,8 +56,7 @@ void *vm_get_page (enum palloc_flags);
 void *vm_get_multiple (enum palloc_flags, size_t page_cnt);
 void vm_free_page (void *);
 void vm_free_multiple (void *, size_t page_cnt);
-
-void init_supp_page_dir();
+void init_supp_page_dir (void);
 
 page_entry *
 page_get_entry (struct hash *, void *);
@@ -64,6 +72,11 @@ page_less (const struct hash_elem *a_, const struct hash_elem *b_,
 size_t
 page_obtain_pages (struct bitmap *, size_t, size_t);
 // extern uint32_t **page_dir_supp;
-extern page_dir *page_dir_supp;
+
+struct hash_elem *
+page_insert_entry (struct file *, off_t, uint8_t *,
+        uint32_t, uint32_t, bool);
+
+extern page_entry *page_entry_supp;
 
 #endif /* vm/page.h */

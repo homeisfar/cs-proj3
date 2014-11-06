@@ -16,12 +16,13 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/malloc.h"
 #include "vm/page.h"
 
 #define PAGE_DIR_MAX 1 << 10
 
 // uint32_t **page_dir_supp;
-page_dir *page_dir_supp;
+page_entry *page_entry_supp;
 
 
 //still needed to do 4:14PM Nov 1st
@@ -40,13 +41,14 @@ clear page table pagedir_clear_page
 destroy hash table
 
 */
-void init_supp_page_dir();
+void init_supp_page_dir (void);
 
 
-void init_supp_page_dir()
+void
+init_supp_page_dir (void)
 {
     // page_dir_supp = calloc(PAGE_DIR_MAX, sizeof (uint32_t *));
-    page_dir_supp = calloc(1 << 10, sizeof (page_dir));
+    page_entry_supp = calloc (1 << 10, sizeof (page_entry));
 }
 
 unsigned
@@ -88,27 +90,34 @@ page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
 }
 
 struct hash_elem *
-page_insert_entry ()
+page_insert_entry (struct file *file, off_t ofs, uint8_t *upage,
+        uint32_t read_bytes, uint32_t zero_bytes, bool writable)
 {
     struct thread *t = thread_current ();
-    struct hash pages = t->page_table_supp;
-    page_entry *p = t->supp_page_data->pages; //potentially bad
+    struct hash pages = t->page_table_hash;
+
+    page_entry_supp->happy = 50101;
+    page_entry_supp->f = file;
+    page_entry_supp->ofs = ofs;
+    page_entry_supp->upage = upage;
+    page_entry_supp->read_bytes = read_bytes;
+    page_entry_supp->zero_bytes = zero_bytes;
+    if (writable)
+      set_writeable (page_entry_supp->meta);
 
     //if we insert an entry for the first time we can assume that
     //the entry hasn't been loaded into a frame yet.
-    //TODO: Modify the bits from page.h
-    //TODO: Palloc here?
 
-    return hash_insert (&pages, &p->page_elem);
+    return hash_insert (&pages, &page_entry_supp->page_elem);
 }
 
 struct hash_elem *
 page_remove_entry ()
 {
     struct thread *t = thread_current ();
-    struct hash pages = t->page_table_supp;
-    page_entry *p = t->supp_page_data->pages; //potentially bad
-    return hash_delete (&pages, &p->page_elem);
+    struct hash pages = t->page_table_hash;
+    // page_entry *p = t->supp_page_data; //potentially bad
+    return hash_delete (&pages, &page_entry_supp->page_elem);
 }
 
 
