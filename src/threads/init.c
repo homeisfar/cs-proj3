@@ -105,7 +105,6 @@ main (void)
 
   //Student code
   init_frame_table ();
-  init_supp_page_dir ();
 
   /* Segmentation. */
 #ifdef USERPROG

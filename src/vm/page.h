@@ -8,12 +8,14 @@
 #include <filesys/file.h>
 
 #define is_alloc(x) (x & 1)		/* Tells us if it's in frame or swap */
-#define is_in_frame(x) (x & 6)	/* More specifically, if it is in frame or swap, or zero page. We need 2 bits */
+#define is_in_frame(x) (x & 2)	/* More specifically, if it is in frame or swap */
+#define is_zero_pages(x) (x & 4)/* User is requesting all 0 pages */
 #define is_writeable(x) (x & 8)	/* Page can be written to. Useful for shared memory */
 #define is_stack(x) (x & 16)	/* Is the page a stack page? For stack growth */
 
 #define set_frame(x) (x |= 2)
 #define set_writeable(x) (x |= 8)
+#define set_stack(x) (x |= 16)
 /*
 	We also want to keep track in our supp table of:
 
@@ -27,7 +29,7 @@ typedef struct page_entry{
   // uint32_t * page_ptr;
 	 // bool dirty_bit = pagedir_is_dirty (pagedir, page);
   // bool reference_bit bad code
-	void *vaddr;
+	// void *vaddr;
 	struct hash_elem page_elem;
 	uint8_t meta;
 	struct file *f;
@@ -36,6 +38,7 @@ typedef struct page_entry{
     uint32_t read_bytes; 
     uint32_t zero_bytes;
     int happy;
+	
 	/*
 		swap meta data
 	*/

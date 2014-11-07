@@ -175,6 +175,10 @@ process_exit (void)
     struct thread *cur = thread_current ();
     uint32_t *pd;
 
+    //TODO: INCLUDE A HASH ITERATOR TO FREE/RECLAIM MEMORY
+    // printf("Process is executing: print its hash");
+    // hash_print ();
+
     /* Destroy the current process's page directory and switch back
        to the kernel-only page directory. */
     pd = cur->pagedir;
@@ -476,6 +480,31 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
 
    Return true if successful, false if a memory allocation error
    or disk read error occurs. */
+
+
+
+
+void hash_func (struct hash_elem *e, void *a )
+{
+  page_entry *pe = hash_entry(e, page_entry, page_elem);
+  printf("Upage: %p\n", pe->upage);
+}
+
+
+void hash_print ()
+{
+  struct thread *t = thread_current ();
+  struct hash h = t->page_table_hash;
+  struct hash_iterator i;
+  hash_first (&i, &h);
+  while (hash_next (&i))
+    {
+      page_entry *f = hash_entry (hash_cur (&i), page_entry, page_elem);
+      printf ("upage: %p\n", f->upage);
+    }
+
+}
+
 static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
         uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
@@ -501,15 +530,19 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
         uint8_t *kpage = palloc_get_page (PAL_USER);
        
-        page_insert_entry (file, ofs, upage, read_bytes, zero_bytes, writable);
-        struct thread *t = thread_current ();
+        void *whoanelly = page_insert_entry (file, ofs, upage, read_bytes, zero_bytes, writable);
+        
+        //TODO: Figure out where to update vaddr
+        // if(whoanelly == NULL)
+          // printf("<>CALLING LOAD_SEGMENT<>\n");
+        // struct thread *t = thread_current ();
         // if(t->supp_page_data->vaddr)
         // {
 
-
-          page_entry *pagelol = page_get_entry (&t->page_table_hash, t->supp_page_data->vaddr);
-        // printf("<>CALLING LOAD_SEGMENT<>\n");
-        printf("Literally straight outta the hash table: %d\n", pagelol->happy);
+          printf ("The value of upage in load_seg:, %p\n", /*t->supp_page_data->upage,*/ upage);
+          // page_entry *pagelol = page_get_entry (&t->page_table_hash, upage);
+        
+        // printf("Literally straight outta the hash table: %d\n", pagelol->happy);
 // }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -541,6 +574,13 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         zero_bytes -= page_zero_bytes;
         upage += PGSIZE;
     }
+
+    //TEST CODE
+    // printf ( " plZzzzzzzzzzzzz  \n\n");
+    // struct thread *t = thread_current ();
+    // printf ( " pls sss s s  \n\n");
+
+    // printf( "ABOUT TO DO SOME REAL WORK HERE \n");
     return true;
 }
 
@@ -558,7 +598,7 @@ setup_stack (void **esp, const char *file_name)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-    kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+    kpage = palloc_get_page (PAL_ZERO);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
