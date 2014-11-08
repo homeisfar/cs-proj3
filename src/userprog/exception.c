@@ -162,10 +162,16 @@ page_fault (struct intr_frame *f)
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
+
+  // printf("fault_addr:    %p\n", fault_addr);
+  // printf("fault_addr_rounded:    %p\n", fault_addr_rounded);
+
+  if(fault_entry == NULL)
+    // printf( "Fault entry is NULL!!!!!!! \n \n ");
   // printf ("THE MEMORY! %p\n", fault_entry->upage);
   if (!fault_entry) 
   {
-    printf("<<<<---1>>>>>\n");
+    // printf("<<<<---1>>>>>\n");
       kill (f);
   }
   
@@ -174,26 +180,27 @@ page_fault (struct intr_frame *f)
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
-    printf("<<<<0>>>>>\n");
+    // printf("<<<<0>>>>>\n");
     kill (f);
   }
       
     else if ( is_in_fs(fault_entry->meta))
     {
-      printf("<<<<1>>>>>\n");
+      // printf("<<<<1>>>>>\n");
         uint8_t *kpage = fault_entry->phys_page;
 
         if (kpage == NULL)
         {
-          printf("<<<<2>>>>>\n");
+          // printf("<<<<2>>>>>\n");
           kill (f);
         }
             
 
         /* Load this page. */
+        file_seek (fault_entry->f, fault_entry->ofs);
         if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
         {
-            printf("<<<<3>>>>>\n");
+            // printf("<<<<3>>>>>\n");
             palloc_free_page (kpage);
             kill (f); 
         }
