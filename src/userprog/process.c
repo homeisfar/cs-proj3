@@ -530,7 +530,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
         // uint8_t *kpage = palloc_get_page (PAL_USER);
        
-        void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, read_bytes, zero_bytes, writable);
+        void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, page_read_bytes, page_zero_bytes, writable);
         
         //TODO: Figure out where to update vaddr
         // if(whoanelly == NULL)

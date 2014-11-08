@@ -1,6 +1,7 @@
 #include "userprog/exception.h"
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 #include "userprog/gdt.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
@@ -161,8 +162,10 @@ page_fault (struct intr_frame *f)
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
+  // printf ("THE MEMORY! %p\n", fault_entry->upage);
   if (!fault_entry) 
   {
+    printf("<<<<---1>>>>>\n");
       kill (f);
   }
   
@@ -170,7 +173,11 @@ page_fault (struct intr_frame *f)
 
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
-      kill (f);
+  {
+    printf("<<<<0>>>>>\n");
+    kill (f);
+  }
+      
     else if ( is_in_fs(fault_entry->meta))
     {
       printf("<<<<1>>>>>\n");
