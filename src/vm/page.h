@@ -7,16 +7,26 @@
 #include <stdint.h>
 #include <filesys/file.h>
 
-#define is_alloc(x) (x & 1)		/* Tells us if it's in frame or swap */
-#define is_in_frame(x) (x & 2)	/* More specifically, if it is in frame or swap */
-#define is_zero_pages(x) (x & 4)/* User is requesting all 0 pages */
-#define is_writeable(x) (x & 8)	/* Page can be written to. Useful for shared memory */
-#define is_stack(x) (x & 16)	/* Is the page a stack page? For stack growth */
+#define is_in_frame(x) (x & 1)		/* Tells us if it's in frame */
+#define is_in_fs(x) (x & 2)	/* More specifically, if it is in fs */
+#define is_in_swap(x) (x & 4)
+#define is_zero_pages(x) (x & 8)/* User is requesting all 0 pages */
+#define is_writeable(x) (x & 16)	/* Page can be written to. Useful for shared memory */
+#define is_stack(x) (x & 32)	/* Is the page a stack page? For stack growth */
 
-#define set_frame(x) (x |= 2)
-#define set_zero_pages(x) (x |= 4)
-#define set_writeable(x) (x |= 8)
-#define set_stack(x) (x |= 16)
+#define set_in_frame(x) (x |= 1)
+#define set_fs(x) (x |= 2)
+#define set_in_swap(x) (x |= 4)
+#define set_zero_pages(x) (x |= 8)
+#define set_writeable(x) (x |= 16)
+#define set_stack(x) (x |= 32)
+
+#define clear_in_frame(x) (x &= ~1)
+#define clear_fs(x) (x &= ~2)
+#define clear_in_swap(x) (x &= ~4)
+#define clear_zero_pages(x) (x &= ~8)
+#define clear_writeable(x) (x &= ~16)
+#define clear_stack(x) (x &= ~32)
 /*
 	We also want to keep track in our supp table of:
 
@@ -38,6 +48,7 @@ typedef struct page_entry{
 	uint8_t *upage;
     uint32_t read_bytes; 
     uint32_t zero_bytes;
+    void *phys_page;
 	
 	/*
 		swap meta data
@@ -77,7 +88,7 @@ page_obtain_pages (struct bitmap *, size_t, size_t);
 // extern uint32_t **page_dir_supp;
 
 struct hash_elem *
-page_insert_entry (struct file *, off_t, uint8_t *,
+page_insert_entry_exec (struct file *, off_t, uint8_t *,
         uint32_t, uint32_t, bool);
 
 extern page_entry *page_entry_supp;

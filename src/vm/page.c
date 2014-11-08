@@ -82,7 +82,7 @@ page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
 }
 
 struct hash_elem *
-page_insert_entry (struct file *file, off_t ofs, uint8_t *upage,
+page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
         uint32_t read_bytes, uint32_t zero_bytes, bool writable)
 {
     page_entry *page_entry_supp = calloc (1 << 10, sizeof (page_entry));
@@ -96,6 +96,7 @@ page_insert_entry (struct file *file, off_t ofs, uint8_t *upage,
     page_entry_supp->zero_bytes = zero_bytes;
     if (writable)
       set_writeable (page_entry_supp->meta);
+    set_fs (page_entry_supp->meta);
 
     return hash_insert (&pages, &page_entry_supp->page_elem);
 }

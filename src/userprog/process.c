@@ -528,9 +528,9 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-        uint8_t *kpage = palloc_get_page (PAL_USER);
+        // uint8_t *kpage = palloc_get_page (PAL_USER);
        
-        void *whoanelly = page_insert_entry (file, ofs, upage, read_bytes, zero_bytes, writable);
+        void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, read_bytes, zero_bytes, writable);
         
         //TODO: Figure out where to update vaddr
         // if(whoanelly == NULL)
@@ -539,7 +539,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         // if(t->supp_page_data->vaddr)
         // {
 
-          printf ("The value of upage in load_seg:, %p\n", /*t->supp_page_data->upage,*/ upage);
+          // printf ("The value of upage in load_seg:, %p\n", /*t->supp_page_data->upage,*/ upage);
           // page_entry *pagelol = page_get_entry (&t->page_table_hash, upage);
         
         // printf("Literally straight outta the hash table: %d\n", pagelol->happy);
@@ -551,23 +551,23 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////      
         
         //TODO: Move this to pagefault handler. Nov 6
-        if (kpage == NULL)
-            return false;
+        // if (kpage == NULL)
+        //     return false;
 
-        /* Load this page. */
-        if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
-        {
-            palloc_free_page (kpage);
-            return false; 
-        }
-        memset (kpage + page_read_bytes, 0, page_zero_bytes);
+        // /* Load this page. */
+        // if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
+        // {
+        //     palloc_free_page (kpage);
+        //     return false; 
+        // }
+        // memset (kpage + page_read_bytes, 0, page_zero_bytes);
 
-        /* Add the page to the process's address space. */
-        if (!install_page (upage, kpage, writable)) 
-        {
-            palloc_free_page (kpage);
-            return false; 
-        }
+        // /* Add the page to the process's address space. */
+        // if (!install_page (upage, kpage, writable)) 
+        // {
+        //     palloc_free_page (kpage);
+        //     return false; 
+        // }
 
         /* Advance. */
         read_bytes -= page_read_bytes;

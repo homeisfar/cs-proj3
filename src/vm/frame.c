@@ -31,7 +31,7 @@
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
-int frame_get_page (uint32_t *, void *, bool , page_entry *);
+bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
 //uintptr_t *frame_evict_page ();
@@ -46,7 +46,7 @@ init_frame_table ()
 }
 
 /* Obtain a single frame */
-int
+bool
 frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entry)
 {
 	void *page;
@@ -67,7 +67,8 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = page;
 	frame_table[index].page_dir_entry = fault_entry;
-	set_frame(frame_table[index].page_dir_entry->meta);
+	fault_entry->phys_page = page;
+	set_in_frame(frame_table[index].page_dir_entry->meta);
 	return pagedir_set_page (pd, upage, page, writable);
 }
 
@@ -76,7 +77,7 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 
 /* Obtain a frame for a stack page */
 // should work for valid, non-eviction cases in current state,
-// assuming that page_insert_entry and frame_get_page are correctly implemented
+// assuming that page_insert_entry_exec and frame_get_page are correctly implemented
 void *
 frame_get_stack_page (void * vaddr)
 {
@@ -114,7 +115,7 @@ frame_get_stack_page (void * vaddr)
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = kpage;
 	frame_table[index].page_dir_entry = fault_entry;
-	set_frame (frame_table[index].page_dir_entry->meta);
+	set_in_frame (frame_table[index].page_dir_entry->meta);
 	
 
 

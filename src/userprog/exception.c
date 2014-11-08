@@ -6,6 +6,7 @@
 #include "threads/thread.h"
 #include "userprog/syscall.h"
 #include "vm/frame.h"
+#include "vm/page.h"
 /* Number of page faults processed. */
 static long long page_fault_cnt;
 
@@ -155,29 +156,65 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
-  struct thread *t = thread_current();
-  page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr);
+  struct thread *t = thread_current ();
+  void *fault_addr_rounded = pg_round_down (fault_addr);
+
+  page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
   if (!fault_entry) 
   {
       kill (f);
   }
   
-  bool writeable = is_writeable(fault_entry->meta) ? true : false;
-  if (!frame_get_page(t->pagedir, fault_addr, writeable, fault_entry))
+  bool writeable = is_writeable (fault_entry->meta) ? true : false;
+
+
+  if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
       kill (f);
+    else if ( is_in_fs(fault_entry->meta))
+    {
+      printf("<<<<1>>>>>\n");
+        uint8_t *kpage = fault_entry->phys_page;
+
+        if (kpage == NULL)
+        {
+          printf("<<<<2>>>>>\n");
+          kill (f);
+        }
+            
+
+        /* Load this page. */
+        if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
+        {
+            printf("<<<<3>>>>>\n");
+            palloc_free_page (kpage);
+            kill (f); 
+        }
+        memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
+
+        /* Add the page to the process's address space. */
+        // if (!install_page (fault_entry->upage, kpage, fault_entry->writable)) 
+        // {
+        //     palloc_free_page (kpage);
+        //     kill (f); 
+        // }
+    }
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
-  printf ("Page fault at %p: %s error %s page in %s context.\n",
-          fault_addr,
-          not_present ? "not present" : "rights violation",
-          write ? "writing" : "reading",
-          user ? "user" : "kernel");
+  // printf ("Page fault at %p: %s error %s page in %s context.\n",
+  //         fault_addr,
+  //         not_present ? "not present" : "rights violation",
+  //         write ? "writing" : "reading",
+  //         user ? "user" : "kernel");
 
-  printf("There is no crying in Pintos!\n");
+  // printf("There is no crying in Pintos!\n");
 
 
 }
+
+//figure out where to load page from
+//load page from it
+
 
