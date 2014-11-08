@@ -513,6 +513,7 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init (&t->sys_wait_sema, 0);
   sema_init (&t->sys_wait_reap, 0);
   t->fd_size = 0;
+  t->esp = NULL;
   
   list_push_back (&all_list, &t->allelem);
 }

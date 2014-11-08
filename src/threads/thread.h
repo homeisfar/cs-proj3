@@ -155,6 +155,8 @@ struct thread
     // void *so_meta_wow;
 #endif
 
+    void *esp;        /* esp pointer for syscall stack growth */
+
     /* Pointer to Supplemental Page Table */
     struct hash page_table_hash;
     struct bitmap *vpage_bitmap;

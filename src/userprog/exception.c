@@ -162,17 +162,31 @@ page_fault (struct intr_frame *f)
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
-
-  // printf("fault_addr:    %p\n", fault_addr);
-  // printf("fault_addr_rounded:    %p\n", fault_addr_rounded);
-
-  if(fault_entry == NULL)
-    // printf( "Fault entry is NULL!!!!!!! \n \n ");
-  // printf ("THE MEMORY! %p\n", fault_entry->upage);
   if (!fault_entry) 
   {
-    // printf("<<<<---1>>>>>\n");
-      kill (f);
+    // check if 'should be' a stack access -> stack growth
+    // should impose absolute limit on stack size - maybe 8MB
+    uintptr_t *esp = t->esp ? (uintptr_t) t->esp : (uintptr_t) f->esp;
+    // printf("<1>\n");
+    // printf("faulting addr: %p, esp: %p\n", fault_addr, esp);
+    if (((uintptr_t) fault_addr >= esp - 32) && (fault_addr < PHYS_BASE))
+    {
+      // printf("<2>\n");
+      uint8_t *kpage;
+      bool success = false;
+
+      kpage = frame_get_stack_page (fault_addr);
+      if (kpage != NULL)
+      {
+        // printf("<3>\n");
+        success = pagedir_set_page (t->pagedir, pg_round_down (fault_addr), kpage, true);
+        if (success) {
+          // printf("<4>\n");
+          return;// continue on? return?
+        }
+      }
+    } 
+    kill (f);
   }
   
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
@@ -180,18 +194,15 @@ page_fault (struct intr_frame *f)
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
-    // printf("<<<<0>>>>>\n");
     kill (f);
   }
       
     else if ( is_in_fs(fault_entry->meta))
     {
-      // printf("<<<<1>>>>>\n");
         uint8_t *kpage = fault_entry->phys_page;
 
         if (kpage == NULL)
         {
-          // printf("<<<<2>>>>>\n");
           kill (f);
         }
             
@@ -200,7 +211,6 @@ page_fault (struct intr_frame *f)
         file_seek (fault_entry->f, fault_entry->ofs);
         if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
         {
-            // printf("<<<<3>>>>>\n");
             palloc_free_page (kpage);
             kill (f); 
         }
@@ -227,8 +237,3 @@ page_fault (struct intr_frame *f)
 
 
 }
-
-//figure out where to load page from
-//load page from it
-
-

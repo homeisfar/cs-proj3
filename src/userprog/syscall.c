@@ -69,6 +69,8 @@ syscall_handler (struct intr_frame *f UNUSED)
   int sys_call_num;
   void *default_esp = f->esp;
   valid_ptr (f->esp);
+  struct thread *t = thread_current ();
+  t->esp = f->esp;
 
 
   f->esp = pop (f->esp, (void *) &sys_call_num, sizeof (int));
@@ -202,6 +204,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
   }
   f->esp = default_esp;
+  t->esp = NULL;
 }
 
 /* When the user process attempts to exit, set the thread
