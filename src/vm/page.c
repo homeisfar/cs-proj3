@@ -89,7 +89,6 @@ page_insert_entry (struct file *file, off_t ofs, uint8_t *upage,
     struct thread *t = thread_current ();
     struct hash pages = t->page_table_hash;
 
-    page_entry_supp->happy = 50101;
     page_entry_supp->f = file;
     page_entry_supp->ofs = ofs;
     page_entry_supp->upage = upage;
@@ -98,8 +97,18 @@ page_insert_entry (struct file *file, off_t ofs, uint8_t *upage,
     if (writable)
       set_writeable (page_entry_supp->meta);
 
-    //if we insert an entry for the first time we can assume that
-    //the entry hasn't been loaded into a frame yet.
+    return hash_insert (&pages, &page_entry_supp->page_elem);
+}
+
+struct hash_elem *
+page_insert_entry_stack (uint8_t *upage)
+{
+    page_entry *page_entry_supp = calloc (1 << 10, sizeof (page_entry));
+    struct thread *t = thread_current ();
+    struct hash pages = t->page_table_hash;
+    set_stack (page_entry_supp->meta);
+    set_writeable (page_entry_supp->meta);
+    page_entry_supp->upage = upage;
 
     return hash_insert (&pages, &page_entry_supp->page_elem);
 }

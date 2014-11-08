@@ -71,6 +71,68 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 	return pagedir_set_page (pd, upage, page, writable);
 }
 
+
+
+
+/* Obtain a frame for a stack page */
+// should work for valid, non-eviction cases in current state,
+// assuming that page_insert_entry and frame_get_page are correctly implemented
+void *
+frame_get_stack_page (void * vaddr)
+{
+	void *kpage;
+	// uint32_t offset;
+	uint32_t *pd = thread_current ()->pagedir; // for pagedir_set_page
+	uint8_t *upage = pg_round_down (vaddr); // used in supp.p.t. also
+	uint8_t *free_start = ptov (1024 * 1024);
+	kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+
+
+	if (!kpage)
+	{
+		// printf("<1>\n");
+		kpage = frame_evict_page(); // eviction here
+		if (!kpage)
+			return NULL;
+	}
+
+
+	uint32_t index = ((uintptr_t) kpage - (uintptr_t) free_start) / PGSIZE;
+	// create supplemental page table entry
+	ASSERT ( page_insert_entry_stack (upage) == NULL);
+
+	page_entry *fault_entry = page_get_entry (&thread_current ()->page_table_hash, upage);
+	
+
+	if (!fault_entry)
+	{
+		// printf("<2>\n");
+		palloc_free_page (kpage);
+		return NULL;
+	}
+
+	// make frame entry point to supplemental page dir entry
+	frame_table[index].page = kpage;
+	frame_table[index].page_dir_entry = fault_entry;
+	set_frame (frame_table[index].page_dir_entry->meta);
+	
+
+
+	// if (!pagedir_set_page (pd, upage, kpage, true)) 
+	// {
+	// 	printf("<3>\n");
+	// 	palloc_free_page (kpage);
+	// // free page entry
+	// 	return NULL;
+	// }
+	// printf("<4>\n");
+	return kpage;
+}
+
+
+
+
+
 /* Free page_cnt number of frames from memory */
 void
 frame_free_multiple (void *pages, size_t page_cnt) 
