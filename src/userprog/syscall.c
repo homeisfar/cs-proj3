@@ -46,9 +46,17 @@ static struct lock fs_lock;
 void 
 valid_ptr (const void *usrdata) 
 {
-	if (!(usrdata && is_user_vaddr (usrdata) && 
-  pagedir_get_page (thread_current()->pagedir, usrdata)))
-    sys_exit (-1);
+  struct thread *t = thread_current ();
+  void *usrdata_rounded = pg_round_down (usrdata);
+  
+	if (!(usrdata && is_user_vaddr (usrdata)))
+  {
+   sys_exit (-1);
+  }
+
+  if (!(page_get_entry (&t->page_table_hash, usrdata_rounded) 
+    || ((uintptr_t) usrdata >= t->esp - 32) && (usrdata < PHYS_BASE)))
+    sys_exit(-1);
 }
 
 /* Initialize the system call handler and the file system lock. */

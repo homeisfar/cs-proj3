@@ -162,6 +162,7 @@ page_fault (struct intr_frame *f)
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
+  // Stack Growth
   if (!fault_entry) 
   {
     // check if 'should be' a stack access -> stack growth
@@ -186,15 +187,15 @@ page_fault (struct intr_frame *f)
         }
       }
     } 
-    kill (f);
+    sys_exit (-1);// (f);
   }
   
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
 
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
-  {
-    kill (f);
+  {printf("<6>\n");
+    sys_exit (-1);// (f);
   }
       
     else if ( is_in_fs(fault_entry->meta))
@@ -202,17 +203,16 @@ page_fault (struct intr_frame *f)
         uint8_t *kpage = fault_entry->phys_page;
 
         if (kpage == NULL)
-        {
-          kill (f);
+        {printf("<5>\n");
+          sys_exit (-1);// (f);
         }
             
-
         /* Load this page. */
         file_seek (fault_entry->f, fault_entry->ofs);
         if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
-        {
+        {printf("<4>\n");
             palloc_free_page (kpage);
-            kill (f); 
+            sys_exit (-1);// (f); 
         }
         memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
 
