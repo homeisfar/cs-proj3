@@ -55,7 +55,6 @@ typedef struct page_entry{
 	*/
 } page_entry;
 
-
 // typedef struct page_dir
 // {
 //     // meta-data

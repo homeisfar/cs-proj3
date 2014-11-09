@@ -111,6 +111,7 @@ start_process (void *file_name_)
     memset (t->fds, 0, FDMAX * sizeof (struct file *));
 
     hash_init (&t->page_table_hash, page_hash, page_less, NULL);
+    //TODO: Remove bitmap
     t->vpage_bitmap = bitmap_create(512);
     if (!t->vpage_bitmap)
       PANIC("Virtual page bitmap failed to initialize");
@@ -537,45 +538,10 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
         // uint8_t *kpage = palloc_get_page (PAL_USER);
-       
+
         void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, page_read_bytes, page_zero_bytes, writable);
-        
-        //TODO: Figure out where to update vaddr
-        // if(whoanelly == NULL)
-          // printf("<>CALLING LOAD_SEGMENT<>\n");
-        // struct thread *t = thread_current ();
-        // if(t->supp_page_data->vaddr)
-        // {
-
-          // printf ("The value of upage in load_seg:, %p\n", /*t->supp_page_data->upage,*/ upage);
-          // page_entry *pagelol = page_get_entry (&t->page_table_hash, upage);
-        
-        // printf("Literally straight outta the hash table: %d\n", pagelol->happy);
-// }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////      
-        
-        //TODO: Move this to pagefault handler. Nov 6
-        // if (kpage == NULL)
-        //     return false;
-
-        // /* Load this page. */
-        // if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
-        // {
-        //     palloc_free_page (kpage);
-        //     return false; 
-        // }
-        // memset (kpage + page_read_bytes, 0, page_zero_bytes);
-
-        // /* Add the page to the process's address space. */
-        // if (!install_page (upage, kpage, writable)) 
-        // {
-        //     palloc_free_page (kpage);
-        //     return false; 
-        // }
+        // if(whoa_nelly)
+        //   return false;
 
         /* Advance. */
         read_bytes -= page_read_bytes;
@@ -584,12 +550,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         upage += PGSIZE;
     }
 
-    //TEST CODE
-    // printf ( " plZzzzzzzzzzzzz  \n\n");
-    // struct thread *t = thread_current ();
-    // printf ( " pls sss s s  \n\n");
-
-    // printf( "ABOUT TO DO SOME REAL WORK HERE \n");
     return true;
 }
 

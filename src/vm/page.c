@@ -21,6 +21,8 @@
 
 #define PAGE_DIR_MAX 1 << 10
 
+
+
 // uint32_t **page_dir_supp;
 // page_entry *page_entry_supp;
 
@@ -85,10 +87,12 @@ struct hash_elem *
 page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
         uint32_t read_bytes, uint32_t zero_bytes, bool writable)
 {
-    page_entry *page_entry_supp = calloc (1 << 10, sizeof (page_entry));
+    page_entry *page_entry_supp = calloc (1, sizeof (page_entry));
     struct thread *t = thread_current ();
-    struct hash pages = t->page_table_hash;
+    struct hash *pages = &t->page_table_hash;
+    // if(!page_entry_supp)
 
+    //ASSERT (page_entry_supp);
     page_entry_supp->f = file;
     page_entry_supp->ofs = ofs;
     page_entry_supp->upage = upage;
@@ -98,13 +102,13 @@ page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
       set_writeable (page_entry_supp->meta);
     set_fs (page_entry_supp->meta);
 
-    return hash_insert (&pages, &page_entry_supp->page_elem);
+    return hash_insert (pages, &page_entry_supp->page_elem);
 }
 
 struct hash_elem *
 page_insert_entry_stack (uint8_t *upage)
 {
-    page_entry *page_entry_supp = calloc (1 << 10, sizeof (page_entry));
+    page_entry *page_entry_supp = calloc (1, sizeof (page_entry));
     struct thread *t = thread_current ();
     struct hash pages = t->page_table_hash;
     set_stack (page_entry_supp->meta);
