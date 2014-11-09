@@ -187,7 +187,7 @@ page_fault (struct intr_frame *f)
         }
       }
     } 
-    sys_exit (-1);// (f);
+    kill (f);
   }
   
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
@@ -195,7 +195,7 @@ page_fault (struct intr_frame *f)
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {printf("<6>\n");
-    sys_exit (-1);// (f);
+    kill (f);
   }
       
     else if ( is_in_fs(fault_entry->meta))
@@ -204,7 +204,7 @@ page_fault (struct intr_frame *f)
 
         if (kpage == NULL)
         {printf("<5>\n");
-          sys_exit (-1);// (f);
+          kill (f);
         }
             
         /* Load this page. */
@@ -212,7 +212,7 @@ page_fault (struct intr_frame *f)
         if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
         {printf("<4>\n");
             palloc_free_page (kpage);
-            sys_exit (-1);// (f); 
+            kill (f); 
         }
         memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
 

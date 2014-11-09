@@ -28,12 +28,14 @@
 /* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
 
+
+size_t user_pages;
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
 bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
-void frame_free_multiple (void *, size_t);
+void frame_clear_page (void *);
 //uintptr_t *frame_evict_page ();
 
 
@@ -42,7 +44,11 @@ void frame_free_multiple (void *, size_t);
 void
 init_frame_table ()
 {
-	frame_table = calloc (FRAME_MAX, sizeof (frame_entry));
+	uint8_t *free_start = ptov (1024 * 1024);
+ 	uint8_t *free_end = ptov (init_ram_pages * PGSIZE);
+ 	size_t free_pages = (free_end - free_start) / PGSIZE;
+ 	user_pages = free_pages / 2;
+	frame_table = calloc (user_pages, sizeof (frame_entry));
 }
 
 /* Obtain a single frame */
@@ -91,7 +97,6 @@ frame_get_stack_page (void * vaddr)
 
 	if (!kpage)
 	{
-		// printf("<1>\n");
 		kpage = frame_evict_page(); // eviction here
 		if (!kpage)
 			return NULL;
@@ -107,7 +112,6 @@ frame_get_stack_page (void * vaddr)
 
 	if (!fault_entry)
 	{
-		// printf("<2>\n");
 		palloc_free_page (kpage);
 		return NULL;
 	}
@@ -117,16 +121,6 @@ frame_get_stack_page (void * vaddr)
 	frame_table[index].page_dir_entry = fault_entry;
 	set_in_frame (frame_table[index].page_dir_entry->meta);
 	
-
-
-	// if (!pagedir_set_page (pd, upage, kpage, true)) 
-	// {
-	// 	printf("<3>\n");
-	// 	palloc_free_page (kpage);
-	// // free page entry
-	// 	return NULL;
-	// }
-	// printf("<4>\n");
 	return kpage;
 }
 
@@ -136,13 +130,12 @@ frame_get_stack_page (void * vaddr)
 
 /* Free page_cnt number of frames from memory */
 void
-frame_free_multiple (void *pages, size_t page_cnt) 
+frame_clear_page (void *page) 
 {
 	uint32_t offset;
 	uint8_t *free_start = ptov (1024 * 1024);
-	for(offset = 0; offset < page_cnt; offset++)
-		frame_table[((uintptr_t)pages - (uintptr_t)free_start)/PGSIZE + offset].page = NULL;
-	palloc_free_multiple (pages, page_cnt);
+		frame_table[((uintptr_t)page - (uintptr_t)free_start)/PGSIZE + offset].page = NULL;
+	palloc_free_page (page);
 }
 
 /* Free a single frame from memory */
@@ -156,17 +149,3 @@ frame_evict_page ()
 	// pagedir_clear_page (uint32_t *pd, void *upage) 
 
 }
-
-/* Retreive the next free available page from the frame table, starting from
-   the passed starting integer */
-// int
-// next_free_entry (int start)
-// {
-// 	uint32_t i = start;
-// 	while (frame_table[i].page && i < FRAME_MAX)
-// 		i++;
-// 	if (i >= FRAME_MAX)
-// 		return -1;
-// 	return i;
-// }
-

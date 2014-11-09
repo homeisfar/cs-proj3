@@ -19,6 +19,7 @@
 #include "threads/vaddr.h"
 
 #include "vm/frame.h"
+#include "threads/malloc.h"
 
 /* Padding to byte align the user's stack */
 #define PADDING(x) ((sizeof (void *) - x) & (sizeof (void *) - 1))
@@ -168,6 +169,19 @@ process_wait (tid_t child_tid UNUSED)
     return exit_status;
 }
 
+
+void hash_func (struct hash_elem *e, void *a )
+{
+  struct thread *t = thread_current ();
+  page_entry *pe = hash_entry(e, page_entry, page_elem);
+  //TODO: remove from FRAME && SWAP (frame_clear_page () && swap_clear_page ())
+
+  pagedir_clear_page (t->pagedir, pe->upage);
+  palloc_free_page (pe->phys_page);
+  free (pe);
+}
+
+
 /* Free the current process's resources. */
 void
 process_exit (void)
@@ -175,12 +189,11 @@ process_exit (void)
     struct thread *cur = thread_current ();
     uint32_t *pd;
 
-    //TODO: INCLUDE A HASH ITERATOR TO FREE/RECLAIM MEMORY
-    // printf("Process is executing: print its hash");
-    // hash_print ();
-
     /* Destroy the current process's page directory and switch back
        to the kernel-only page directory. */
+
+    hash_destroy (&cur->page_table_hash, hash_func);
+
     pd = cur->pagedir;
     if (pd != NULL) 
     {
@@ -484,11 +497,7 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
 
 
 
-void hash_func (struct hash_elem *e, void *a )
-{
-  page_entry *pe = hash_entry(e, page_entry, page_elem);
-  printf("Upage: %p\n", pe->upage);
-}
+
 
 
 void hash_print ()
@@ -502,7 +511,6 @@ void hash_print ()
       page_entry *f = hash_entry (hash_cur (&i), page_entry, page_elem);
       printf ("upage: %p\n", f->upage);
     }
-
 }
 
 static bool
