@@ -7,26 +7,26 @@
 #include <stdint.h>
 #include <filesys/file.h>
 
-#define is_in_frame(x) (x & 1)		/* Tells us if it's in frame */
-#define is_in_fs(x) (x & 2)	/* More specifically, if it is in fs */
-#define is_in_swap(x) (x & 4)
-#define is_zero_pages(x) (x & 8)/* User is requesting all 0 pages */
-#define is_writeable(x) (x & 16)	/* Page can be written to. Useful for shared memory */
-#define is_stack(x) (x & 32)	/* Is the page a stack page? For stack growth */
+#define is_in_frame(x) ((x) & 1)		/* Tells us if it's in frame */
+#define is_in_fs(x) ((x) & 2)	/* More specifically, if it is in fs */
+#define is_in_swap(x) ((x) & 4)
+#define is_zero_pages(x) ((x) & 8)/* User is requesting all 0 pages */
+#define is_writeable(x) ((x) & 16)	/* Page can be written to. Useful for shared memory */
+#define is_stack(x) ((x) & 32)	/* Is the page a stack page? For stack growth */
 
-#define set_in_frame(x) (x |= 1)
-#define set_fs(x) (x |= 2)
-#define set_in_swap(x) (x |= 4)
-#define set_zero_pages(x) (x |= 8)
-#define set_writeable(x) (x |= 16)
-#define set_stack(x) (x |= 32)
+#define set_in_frame(x) ((x) |= 1)
+#define set_fs(x) ((x) |= 2)
+#define set_in_swap(x) ((x) |= 4)
+#define set_zero_pages(x) ((x) |= 8)
+#define set_writeable(x) ((x) |= 16)
+#define set_stack(x) ((x) |= 32)
 
-#define clear_in_frame(x) (x &= ~1)
-#define clear_fs(x) (x &= ~2)
-#define clear_in_swap(x) (x &= ~4)
-#define clear_zero_pages(x) (x &= ~8)
-#define clear_writeable(x) (x &= ~16)
-#define clear_stack(x) (x &= ~32)
+#define clear_in_frame(x) ((x) &= ~1)
+#define clear_fs(x) ((x) &= ~2)
+#define clear_in_swap(x) ((x) &= ~4)
+#define clear_zero_pages(x) ((x) &= ~8)
+#define clear_writeable(x) ((x) &= ~16)
+#define clear_stack(x) ((x) &= ~32)
 /*
 	We also want to keep track in our supp table of:
 

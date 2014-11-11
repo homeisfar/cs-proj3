@@ -28,7 +28,7 @@
 /* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
 
-#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2)
+#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
 
 size_t user_pages;
 /* Create a frame table that has 2^20 frame entries,
@@ -37,8 +37,7 @@ frame_entry *frame_table;
 bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_clear_page (void *);
-//uintptr_t *frame_evict_page ();
-
+uintptr_t *frame_evict_page ();
 
 /* Initialize the elements of the frame table allocating and clearing a
    set of memory */
@@ -48,7 +47,8 @@ init_frame_table ()
 	uint8_t *free_start = ptov (1024 * 1024);
  	uint8_t *free_end = ptov (init_ram_pages * PGSIZE);
  	size_t free_pages = (free_end - free_start) / PGSIZE;
- 	user_pages = free_pages / 2;
+ 	user_pages = free_pages / 2 - 1;
+ 	//PANIC("User pages: %lu\n", user_pages);
 	frame_table = calloc (user_pages, sizeof (frame_entry));
 }
 
@@ -57,8 +57,6 @@ bool
 frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entry)
 {
 	void *page;
-	uint32_t offset;
-	uint8_t *free_start = ptov (1024 * 1024);
 	page = palloc_get_page (PAL_USER);
 	if (!page)
 	{
@@ -67,10 +65,9 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 		if (!page)
 			return 0;
 	}
-	// printf ("The value of the page is: %p\n\n", page);
-	// printf ("The value of the division is: %d\n\n", ((uintptr_t)page - (uintptr_t)free_start)/PGSIZE);
+
 	uint32_t index = index((int) page);
-	//supplemental_table[index].index = index;
+	//printf("ACQUIRED REG PAGE: %d\n", index);
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = page;
 	frame_table[index].page_dir_entry = fault_entry;
@@ -90,10 +87,7 @@ void *
 frame_get_stack_page (void * vaddr)
 {
 	void *kpage;
-	// uint32_t offset;
-	uint32_t *pd = thread_current ()->pagedir; // for pagedir_set_page
 	uint8_t *upage = pg_round_down (vaddr); // used in supp.p.t. also
-	uint8_t *free_start = ptov (1024 * 1024);
 	kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
 
@@ -104,7 +98,9 @@ frame_get_stack_page (void * vaddr)
 			return NULL;
 	}
 
-	uint32_t index = index((int) upage);
+	uint32_t index = index((int) kpage);
+	//printf("ACQUIRED STACK PAGE: %lu\n", index);
+
 
 	// create supplemental page table entry
 	ASSERT ( page_insert_entry_stack (upage) == NULL);
@@ -126,10 +122,6 @@ frame_get_stack_page (void * vaddr)
 	return kpage;
 }
 
-
-
-
-
 /* Free page_cnt number of frames from memory */
 void
 frame_clear_page (void *page) 
@@ -144,36 +136,59 @@ frame_clear_page (void *page)
 uintptr_t *
 frame_evict_page () 
 {
-	printf("Evicted\n");
-	return NULL;
+	static int clock_hand = 0;
+	// printf("Evicted\n");
+	// return NULL;
 	// eviction algorithm goes here
 	// for now, panic/fail
 	// only goes into swap if dirty
-/*	
+	
 	uint32_t *pd = thread_current ()->pagedir;
-	void *evict_frame;
+	void *evict_frame = NULL;
 	while (evict_frame == NULL)
 	{
-		if (pagedir_is_accessed(pd, frame_table[clock_hand]))
+		// if(!frame_table[clock_hand].page_dir_entry) 
+		// {
+		// 	PANIC("%d\n", clock_hand);
+		// 	clock_hand = (clock_hand + 1) % user_pages;
+		// 	continue;
+		// } 
+		if (pagedir_is_accessed(pd, frame_table[clock_hand].page))
 		{
-			pagedir_set_accessed(pd, frame_table[clock_hand], 0);
-			clock_hand++;
+			pagedir_set_accessed(pd, frame_table[clock_hand].page, 0);
+			clock_hand = (clock_hand + 1) % user_pages;
 		} else {
-			if (pagedir_is_dirty(pd, frame_table[clock_hand]))
+			if (pagedir_is_dirty(pd, frame_table[clock_hand].page))
 			{
+				PANIC("SWAP HERE");
+				// if (swap_find_free())
 			//swap to swap area
 			//if swap table is full, panic
 			}
 			//updates to frame, supplemental page table, pagedir
+			evict_frame = frame_table[clock_hand].phys_page;
+
+			//char c = frame_table[clock_hand].page_dir_entry->meta;
+			// if (clock_hand < 0 || clock_hand >= user_pages)
+			// 	PANIC("Bad Clock hand: %d\n", clock_hand);
+			
+			// int c = frame_table[clock_hand].page_dir_entry->meta;
+
+
+			//PANIC("%xhh");
+			//PANIC("%d, %p\n", clock_hand, frame_table[clock_hand].page_dir_entry);
 			clear_in_frame(frame_table[clock_hand].page_dir_entry->meta);
-			pagedir_clear_page();
+			
+			// PANIC("Clock hand: %d\n", clock_hand);
+
+			pagedir_clear_page(pd, frame_table[clock_hand].page);
 			frame_table[clock_hand].page = NULL;
 			frame_table[clock_hand].page_dir_entry = NULL;
-			clock_hand++;
+			clock_hand = (clock_hand + 1) % user_pages;
 		}
 	}
 	return evict_frame;
-*/	
+	
 	// pagedir_clear_page (uint32_t *pd, void *upage) 
 
 }
