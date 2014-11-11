@@ -159,7 +159,6 @@ struct thread
 
     /* Pointer to Supplemental Page Table */
     struct hash page_table_hash;
-    struct bitmap *vpage_bitmap;
 
     /* File Struct for File Descriptors */
     struct file **fds;

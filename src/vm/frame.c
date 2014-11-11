@@ -149,7 +149,7 @@ frame_evict_page ()
 	// eviction algorithm goes here
 	// for now, panic/fail
 	// only goes into swap if dirty
-	/*
+/*	
 	uint32_t *pd = thread_current ()->pagedir;
 	void *evict_frame;
 	while (evict_frame == NULL)
@@ -173,7 +173,7 @@ frame_evict_page ()
 		}
 	}
 	return evict_frame;
-	*/
+*/	
 	// pagedir_clear_page (uint32_t *pd, void *upage) 
 
 }

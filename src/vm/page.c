@@ -72,16 +72,6 @@ page_get_entry (struct hash *page_table, void *fault_addr)
   return elem ? hash_entry(elem, page_entry, page_elem) : NULL;
 }
 
-size_t
-page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
-{
-	size_t start_bit;
-	while((start_bit = bitmap_scan_and_flip (page_map, start, cnt, 0)) == BITMAP_ERROR)
-	{
-		//resize bitmap not yet implemented
-	}
-	return start_bit;
-}
 
 struct hash_elem *
 page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,

@@ -111,10 +111,6 @@ start_process (void *file_name_)
     memset (t->fds, 0, FDMAX * sizeof (struct file *));
 
     hash_init (&t->page_table_hash, page_hash, page_less, NULL);
-    //TODO: Remove bitmap
-    t->vpage_bitmap = bitmap_create(512);
-    if (!t->vpage_bitmap)
-      PANIC("Virtual page bitmap failed to initialize");
 
     success = load (file_name, &if_.eip, &if_.esp);
     struct thread *current = thread_current();

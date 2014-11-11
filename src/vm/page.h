@@ -71,20 +71,13 @@ void vm_free_page (void *);
 void vm_free_multiple (void *, size_t page_cnt);
 void init_supp_page_dir (void);
 
-page_entry *
-page_get_entry (struct hash *, void *);
+page_entry *page_get_entry (struct hash *, void *);
 
-unsigned
-page_hash (const struct hash_elem *p_, void *aux UNUSED);
+unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
 
 /* Returns true if page a precedes page b. */
-bool
-page_less (const struct hash_elem *a_, const struct hash_elem *b_,
+bool page_less (const struct hash_elem *a_, const struct hash_elem *b_,
            void *aux UNUSED);
-
-size_t
-page_obtain_pages (struct bitmap *, size_t, size_t);
-// extern uint32_t **page_dir_supp;
 
 struct hash_elem *
 page_insert_entry_exec (struct file *, off_t, uint8_t *,
