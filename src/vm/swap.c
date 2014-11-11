@@ -22,29 +22,28 @@
 #include "devices/block.h"
 
 struct bitmap *swap_bitmap;
-size_t num_of_swap_pages;
+block_sector_t num_of_swap_pages; 
+struct block *b;
 
 void
 swap_init ()
 {
-	swap_bitmap = bitmap_create(/* STILL NEED A VALUE HERE */);
+	num_of_swap_pages = block_size (b = block_get_role (BLOCK_SWAP)) / 8;
+	swap_bitmap = bitmap_create(num_of_swap_pages);
 	if (!swap_bitmap)
 		PANIC ("Swap bitmap failed to initialize");
-
-
-	// block_get_role
 }
 
 void
-swap_read ()
+swap_read (block_sector_t sector, void *buffer)
 {
-
+	block_read (b, sector, buffer);
 }
 
 void
-swap_write ()
+swap_write (block_sector_t sector, void *buffer)
 {
-
+	block_write (b, sector, buffer);
 }
 
 size_t

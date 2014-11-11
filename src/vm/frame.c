@@ -28,7 +28,8 @@
 /* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
 
-#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2)
+#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) \
+ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2)
 
 size_t user_pages;
 /* Create a frame table that has 2^20 frame entries,
