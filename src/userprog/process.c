@@ -518,6 +518,7 @@ static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
         uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
 {
+    // int i = 0;
     ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
     ASSERT (pg_ofs (upage) == 0);
     ASSERT (ofs % PGSIZE == 0);
@@ -525,6 +526,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     file_seek (file, ofs);
     while (read_bytes > 0 || zero_bytes > 0) 
     {
+      // i++;
         /* Calculate how to fill this page.
            We will read PAGE_READ_BYTES bytes from FILE
            and zero the final PAGE_ZERO_BYTES bytes. */
@@ -539,6 +541,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 ///////////////////////////////////////////////////////////////////////////////
         // uint8_t *kpage = palloc_get_page (PAL_USER);
 
+
         void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, page_read_bytes, page_zero_bytes, writable);
         // if(whoa_nelly)
         //   return false;
@@ -549,7 +552,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         ofs += PGSIZE;
         upage += PGSIZE;
     }
-
+    // printf ("Loaded %d segments", i);
     return true;
 }
 

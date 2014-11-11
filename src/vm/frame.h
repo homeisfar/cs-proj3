@@ -11,6 +11,7 @@ typedef struct frame_entry
   page_entry *page_dir_entry;
   void *page;
 
+  //int clock_hand;
   // int index;
   // struct thread * | char *page_dir_base;
 } frame_entry;

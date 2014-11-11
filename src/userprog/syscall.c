@@ -73,6 +73,7 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f UNUSED)
 {
+      printf("Syscall ------------------------\n");
 
   int sys_call_num;
   void *default_esp = f->esp;
@@ -170,6 +171,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
 
     case SYS_WRITE:{ // 3 args
+      printf("Syscall write\n");
       int arg0;
       void *arg1;
       uint32_t arg2;

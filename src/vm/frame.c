@@ -84,6 +84,7 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 /* Obtain a frame for a stack page */
 // should work for valid, non-eviction cases in current state,
 // assuming that page_insert_entry_exec and frame_get_page are correctly implemented
+
 void *
 frame_get_stack_page (void * vaddr)
 {
@@ -142,10 +143,36 @@ frame_clear_page (void *page)
 uintptr_t *
 frame_evict_page () 
 {
+	printf("Evicted\n");
 	return NULL;
 	// eviction algorithm goes here
 	// for now, panic/fail
 	// only goes into swap if dirty
+	/*
+	uint32_t *pd = thread_current ()->pagedir;
+	void *evict_frame;
+	while (evict_frame == NULL)
+	{
+		if (pagedir_is_accessed(pd, frame_table[clock_hand]))
+		{
+			pagedir_set_accessed(pd, frame_table[clock_hand], 0);
+			clock_hand++;
+		} else {
+			if (pagedir_is_dirty(pd, frame_table[clock_hand]))
+			{
+			//swap to swap area
+			//if swap table is full, panic
+			}
+			//updates to frame, supplemental page table, pagedir
+			clear_in_frame(frame_table[clock_hand].page_dir_entry->meta);
+			pagedir_clear_page();
+			frame_table[clock_hand].page = NULL;
+			frame_table[clock_hand].page_dir_entry = NULL;
+			clock_hand++;
+		}
+	}
+	return evict_frame;
+	*/
 	// pagedir_clear_page (uint32_t *pd, void *upage) 
 
 }
