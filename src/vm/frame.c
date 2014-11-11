@@ -28,6 +28,7 @@
 /* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
 
+#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2)
 
 size_t user_pages;
 /* Create a frame table that has 2^20 frame entries,
@@ -68,7 +69,7 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 	}
 	// printf ("The value of the page is: %p\n\n", page);
 	// printf ("The value of the division is: %d\n\n", ((uintptr_t)page - (uintptr_t)free_start)/PGSIZE);
-	uint32_t index = ((uintptr_t) page - (uintptr_t) free_start) / PGSIZE ;
+	uint32_t index = index((int) page);
 	//supplemental_table[index].index = index;
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = page;
@@ -103,8 +104,8 @@ frame_get_stack_page (void * vaddr)
 			return NULL;
 	}
 
+	uint32_t index = index((int) upage);
 
-	uint32_t index = ((uintptr_t) kpage - (uintptr_t) free_start) / PGSIZE;
 	// create supplemental page table entry
 	ASSERT ( page_insert_entry_stack (upage) == NULL);
 

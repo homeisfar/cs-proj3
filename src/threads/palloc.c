@@ -68,7 +68,7 @@ palloc_init (size_t user_page_limit)
    available, returns a null pointer, unless PAL_ASSERT is set in
    FLAGS, in which case the kernel panics. */
 void *
-palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
+palloc_get_multiple (enum palloc_flags flags, size_t page_cnt) 
 {
   struct pool *pool = flags & PAL_USER ? &user_pool : &kernel_pool;
   void *pages;

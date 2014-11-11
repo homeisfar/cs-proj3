@@ -184,12 +184,12 @@ page_fault (struct intr_frame *f)
         // printf("<3>\n");
         success = pagedir_set_page (t->pagedir, pg_round_down (fault_addr), kpage, true);
         if (success) {
-          printf("Successful stack growth\n");
+          // printf("Successful stack growth\n");
           return;// continue on? return?
         }
       }
     } 
-    printf("Invalid access?\n");
+    // printf("Invalid access?\n");
     kill (f);
   }
   
@@ -198,7 +198,7 @@ page_fault (struct intr_frame *f)
 
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
-    printf("<6>\n");
+    // printf("<6>\n");
     kill (f);
   }  
   else if (is_in_fs (fault_entry->meta))
@@ -207,7 +207,7 @@ page_fault (struct intr_frame *f)
 
       if (kpage == NULL)
       { 
-        printf("<5>\n");
+        // printf("<5>\n");
         kill (f);
       }
           
@@ -215,7 +215,7 @@ page_fault (struct intr_frame *f)
       file_seek (fault_entry->f, fault_entry->ofs);
       if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
       {
-        printf("<4>\n");
+        // printf("<4>\n");
         palloc_free_page (kpage);
         kill (f); 
       }
@@ -232,12 +232,12 @@ page_fault (struct intr_frame *f)
   } 
   else
   {
-    printf("<3>\n");
+    // printf("<3>\n");
     kill(f);
   }
   // printf("Kpage should exist if you get here\n");
   // printf("Faulting address %p \n", fault_addr);
-  printf("Number of page faults %i \n", page_fault_cnt);
+  // printf("Number of page faults %i \n", page_fault_cnt);
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
