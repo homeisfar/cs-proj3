@@ -1,14 +1,12 @@
 #ifndef VM_SWAP_H
 #define VM_SWAP_H
 
-/* Create a frame entry that contains the
-   pointer to a page in physical memory and
-   contains the page element */
-// struct frame_entry{
-//   uint32_t *page_ptr;
-//   struct page_entry *page;
-// }:
+#include "devices/block.h"
 
-
+void swap_init ();
+void swap_read (block_sector_t, void *);
+void swap_write (block_sector_t, void *);
+size_t swap_acquire ();
+void swap_release (size_t);
 
 #endif /* vm/swap.h */

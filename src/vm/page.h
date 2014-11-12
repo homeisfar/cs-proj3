@@ -49,6 +49,7 @@ typedef struct page_entry{
     uint32_t read_bytes; 
     uint32_t zero_bytes;
     void *phys_page;
+    size_t swap_index;
 	
 	/*
 		swap meta data

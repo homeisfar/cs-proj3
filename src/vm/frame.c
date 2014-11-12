@@ -24,19 +24,22 @@
 #include "vm/page.h"
 #include <bitmap.h>
 #include "vm/frame.h"
+#include "vm/swap.h"
 
 /* Amount of physical memory in 4kb pages */
 #define FRAME_MAX init_ram_pages
 
-#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
+#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) \
+ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
 
+int ii = 0;
 size_t user_pages;
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
 bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
-void frame_clear_page (void *);
+void frame_clear_page (int, uint32_t *);
 uintptr_t *frame_evict_page ();
 
 /* Initialize the elements of the frame table allocating and clearing a
@@ -117,6 +120,7 @@ frame_get_stack_page (void * vaddr)
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = kpage;
 	frame_table[index].page_dir_entry = fault_entry;
+	fault_entry->phys_page = kpage;
 	set_in_frame (frame_table[index].page_dir_entry->meta);
 	
 	return kpage;
@@ -124,12 +128,16 @@ frame_get_stack_page (void * vaddr)
 
 /* Free page_cnt number of frames from memory */
 void
-frame_clear_page (void *page) 
+frame_clear_page (int frame_index, uint32_t *pd)
 {
-	uint32_t offset;
-	uint8_t *free_start = ptov (1024 * 1024);
-		frame_table[((uintptr_t)page - (uintptr_t)free_start)/PGSIZE + offset].page = NULL;
-	palloc_free_page (page);
+	ii++;
+
+	clear_in_frame (frame_table[frame_index].page_dir_entry->meta);
+	//frame_table[frame_index].page = NULL;
+
+	//palloc_free_page (frame_table[frame_index].page);
+	pagedir_clear_page(pd, frame_table[frame_index].page_dir_entry->upage);
+	frame_table[frame_index].page_dir_entry = NULL;
 }
 
 /* Free a single frame from memory */
@@ -152,38 +160,39 @@ frame_evict_page ()
 		// 	PANIC("%d\n", clock_hand);
 		// 	clock_hand = (clock_hand + 1) % user_pages;
 		// 	continue;
-		// } 
+		// }
+
+		//reference bit 
 		if (pagedir_is_accessed(pd, frame_table[clock_hand].page))
 		{
+			//set reference to 0
 			pagedir_set_accessed(pd, frame_table[clock_hand].page, 0);
 			clock_hand = (clock_hand + 1) % user_pages;
-		} else {
+		}
+		else 
+		{
+			// if page is dirty, move to swap
 			if (pagedir_is_dirty(pd, frame_table[clock_hand].page))
 			{
-				PANIC("SWAP HERE");
+				size_t index = swap_acquire ();
+				if (index == BITMAP_ERROR)
+					PANIC ("OUT OF SWAP SPACE");
+
+				//update supp table for swap index
+				frame_table[clock_hand].page_dir_entry->swap_index = index;
+				//write to swap
+				swap_write (index, frame_table[clock_hand].page);
+				set_in_swap(frame_table[clock_hand].page_dir_entry->meta);
+
 				// if (swap_find_free())
 			//swap to swap area
 			//if swap table is full, panic
 			}
+			//else just clear out the page
+
 			//updates to frame, supplemental page table, pagedir
-			evict_frame = frame_table[clock_hand].phys_page;
-
-			//char c = frame_table[clock_hand].page_dir_entry->meta;
-			// if (clock_hand < 0 || clock_hand >= user_pages)
-			// 	PANIC("Bad Clock hand: %d\n", clock_hand);
-			
-			// int c = frame_table[clock_hand].page_dir_entry->meta;
-
-
-			//PANIC("%xhh");
-			//PANIC("%d, %p\n", clock_hand, frame_table[clock_hand].page_dir_entry);
-			clear_in_frame(frame_table[clock_hand].page_dir_entry->meta);
-			
-			// PANIC("Clock hand: %d\n", clock_hand);
-
-			pagedir_clear_page(pd, frame_table[clock_hand].page);
-			frame_table[clock_hand].page = NULL;
-			frame_table[clock_hand].page_dir_entry = NULL;
+			frame_clear_page (clock_hand, pd);
+			evict_frame = frame_table[clock_hand].page;
 			clock_hand = (clock_hand + 1) % user_pages;
 		}
 	}

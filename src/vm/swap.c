@@ -28,7 +28,9 @@ struct block *b;
 void
 swap_init ()
 {
-	num_of_swap_pages = block_size (b = block_get_role (BLOCK_SWAP)) / 8;
+	b = block_get_role (BLOCK_SWAP);
+	num_of_swap_pages = block_size (b) / 8;
+	//PANIC("%d\n", num_of_swap_pages);
 	swap_bitmap = bitmap_create(num_of_swap_pages);
 	if (!swap_bitmap)
 		PANIC ("Swap bitmap failed to initialize");
@@ -37,13 +39,20 @@ swap_init ()
 void
 swap_read (block_sector_t sector, void *buffer)
 {
-	block_read (b, sector, buffer);
+	sector *= 8;
+	int i = 0;
+	for (; i < 8; i++)
+		block_read (b, sector + i, (char *)buffer + i * 512);
+	swap_release (sector/8);
 }
 
 void
 swap_write (block_sector_t sector, void *buffer)
 {
-	block_write (b, sector, buffer);
+	sector *= 8;
+	int i = 0;
+	for (; i < 8; i++)
+		block_write (b, sector + i, (char *)buffer + i * 512);
 }
 
 size_t

@@ -41,6 +41,7 @@
 // Student code
 #include "vm/frame.h"
 #include "vm/page.h"
+#include "vm/swap.h"
 
 /* Page directory with kernel mappings only. */
 uint32_t *init_page_dir;
@@ -103,8 +104,7 @@ main (void)
   malloc_init ();
   paging_init ();
 
-  //Student code
-  init_frame_table ();
+
 
   /* Segmentation. */
 #ifdef USERPROG
@@ -133,6 +133,10 @@ main (void)
   locate_block_devices ();
   filesys_init (format_filesys);
 #endif
+
+    //Student code
+  init_frame_table ();
+  swap_init ();
 
   printf ("Boot complete.\n");
   

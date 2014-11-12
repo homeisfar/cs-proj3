@@ -8,6 +8,8 @@
 #include "userprog/syscall.h"
 #include "vm/frame.h"
 #include "vm/page.h"
+#include "vm/swap.h"
+
 /* Number of page faults processed. */
 static long long page_fault_cnt;
 
@@ -106,7 +108,7 @@ kill (struct intr_frame *f)
          may cause kernel exceptions--but they shouldn't arrive
          here.)  Panic the kernel to make the point.  */
       intr_dump_frame (f);
-      PANIC ("Kernel bug - unexpected interrupt in kernel"); 
+      PANIC ("Kernel bug - unexpected interrupt in kernel: %d\n", ii); 
 
     default:
       /* Some other code segment?  Shouldn't happen.  Panic the
@@ -196,11 +198,30 @@ page_fault (struct intr_frame *f)
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
 
 
+  //Load from FS or swap
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
     // printf("<6>\n");
     kill (f);
   }  
+  //check if it's in swap
+  else if (is_in_swap (fault_entry->meta))
+  {
+    // PANIC ("WE ARE CHECKING TO SEE IF IT IS IN SWAP");
+      uint8_t *kpage = fault_entry->phys_page;
+      if (kpage == NULL)
+      { 
+        // printf("<5>\n");
+        kill (f);
+      }
+
+      //time to load the page
+      swap_read (fault_entry->swap_index, fault_entry->phys_page);
+      clear_in_swap (fault_entry->meta);
+      set_in_frame (fault_entry->meta);
+
+  }
+  //check if it's in FS after swap
   else if (is_in_fs (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
@@ -216,7 +237,7 @@ page_fault (struct intr_frame *f)
       if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
       {
         // printf("<4>\n");
-        palloc_free_page (kpage);
+        // palloc_free_page (kpage); // IS THIS VERY WRONG OR KIND OF WRONG?
         kill (f); 
       }
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);

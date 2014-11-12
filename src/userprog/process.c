@@ -173,8 +173,12 @@ void hash_func (struct hash_elem *e, void *a )
   page_entry *pe = hash_entry(e, page_entry, page_elem);
   //TODO: remove from FRAME && SWAP (frame_clear_page () && swap_clear_page ())
 
+
+
   pagedir_clear_page (t->pagedir, pe->upage);
-  palloc_free_page (pe->phys_page);
+
+  if(is_in_frame (pe->meta))
+    palloc_free_page (pe->phys_page);
   free (pe);
 }
 
@@ -186,10 +190,10 @@ process_exit (void)
     struct thread *cur = thread_current ();
     uint32_t *pd;
 
+    hash_destroy (&cur->page_table_hash, hash_func);
+
     /* Destroy the current process's page directory and switch back
        to the kernel-only page directory. */
-
-    hash_destroy (&cur->page_table_hash, hash_func);
 
     pd = cur->pagedir;
     if (pd != NULL) 
