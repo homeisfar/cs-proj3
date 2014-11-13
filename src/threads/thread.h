@@ -29,7 +29,8 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
-#define FDMAX PGSIZE / sizeof (struct file *) /* Max value of fd table */
+#define FDMAX (PGSIZE / sizeof (struct file *)) /* Max value of fd table */
+#define MAPPINGSMAX (PGSIZE / sizeof (void *))
 
 /* A kernel thread or user process.
 
@@ -163,6 +164,8 @@ struct thread
     /* File Struct for File Descriptors */
     struct file **fds;
     struct file *self_executable;
+    void **mappings;
+
     uint32_t fd_size;
     
     /* Parent thread */

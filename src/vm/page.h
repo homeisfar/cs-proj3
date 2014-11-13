@@ -13,6 +13,8 @@
 #define is_zero_pages(x) ((x) & 8)		/* User is requesting all 0 pages */
 #define is_writeable(x) ((x) & 16)		/* Page can be written to. Useful for shared memory */
 #define is_stack(x) ((x) & 32)			/* Is the page a stack page? For stack growth */
+#define is_mmap(x) ((x) & 64)
+#define is_mmap_final(x) ((x) & 128)
 
 #define set_in_frame(x) ((x) |= 1)
 #define set_fs(x) ((x) |= 2)
@@ -20,6 +22,8 @@
 #define set_zero_pages(x) ((x) |= 8)
 #define set_writeable(x) ((x) |= 16)
 #define set_stack(x) ((x) |= 32)
+#define set_mmap(x) ((x) |= 64)
+#define set_mmap_final(x) ((x) |= 128)
 
 #define clear_in_frame(x) ((x) &= ~1)
 #define clear_fs(x) ((x) &= ~2)
@@ -27,6 +31,9 @@
 #define clear_zero_pages(x) ((x) &= ~8)
 #define clear_writeable(x) ((x) &= ~16)
 #define clear_stack(x) ((x) &= ~32)
+#define clear_mmap(x) ((x) &= ~64)
+#define clear_mmap_final(x) ((x) &= ~128)
+
 
 typedef struct page_entry {
 	struct hash_elem page_elem;

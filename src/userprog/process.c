@@ -108,7 +108,9 @@ start_process (void *file_name_)
     // init file descriptor table
     struct thread *t = thread_current();
     t->fds = palloc_get_page(PAL_ZERO);
+    t->mappings = palloc_get_page(PAL_ZERO);
     memset (t->fds, 0, FDMAX * sizeof (struct file *));
+    memset (t->mappings, 0, FDMAX * sizeof (void *));
 
     hash_init (&t->page_table_hash, page_hash, page_less, NULL);
 
@@ -208,6 +210,7 @@ process_exit (void)
     }
     // free file descriptor table
     palloc_free_page(cur->fds);
+    palloc_free_page(cur->mappings);
 }
 
 /* Sets up the CPU for running user code in the current
@@ -424,7 +427,7 @@ done:
        It needs to remain open and write access denied while the
        process is running. */
     if (!success)
-    file_close (file);
+      file_close (file);
     return success;
 }
 
@@ -522,7 +525,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
         /* Get a page of memory. */
-        void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, page_read_bytes, page_zero_bytes, writable);
+        void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, 
+          page_read_bytes, page_zero_bytes, writable);
 
         /* Advance. */
         read_bytes -= page_read_bytes;

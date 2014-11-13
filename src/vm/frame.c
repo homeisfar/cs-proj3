@@ -154,10 +154,26 @@ frame_evict_page ()
 				size_t index = swap_acquire ();
 				if (index == BITMAP_ERROR)
 					PANIC ("OUT OF SWAP SPACE");
+				
+				page_entry *current_page = frame_table[clock_hand].page_dir_entry;
+				current_page->swap_index = index;
+				 
+				 if(is_mmap (current_page->meta))
+				 {
+					file_write_at (current_page->f, 
+						current_page->phys_page, 
+						current_page->read_bytes, 
+						current_page->ofs); 
 
-				frame_table[clock_hand].page_dir_entry->swap_index = index;
-				swap_write (index, frame_table[clock_hand].page);
-				set_in_swap (frame_table[clock_hand].page_dir_entry->meta);
+				 }
+
+				else
+				{
+					swap_write (index, frame_table[clock_hand].page);
+					set_in_swap (current_page->meta);
+				}
+
+
 			}
 			// clear page and update frame, supplemental page table, pagedir
 			frame_clear_page (clock_hand, pd);

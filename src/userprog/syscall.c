@@ -222,6 +222,17 @@ syscall_handler (struct intr_frame *f UNUSED)
       sys_close (arg0);
       break;
     }
+
+    case SYS_MMAP:{ // 2 arg
+      int arg0;
+      void *arg1;
+      f->esp = pop (f->esp, (void *) &arg0, sizeof (int));
+      valid_ptr (f->esp);
+      f->esp = pop (f->esp, (void *) &arg1, sizeof (void *));
+      valid_ptr (f->esp);
+      sys_mmap (arg0, arg1);
+      break;
+    }
   }
   f->esp = default_esp;
   t->esp = NULL;
@@ -552,6 +563,71 @@ close_helper (struct file *file)
   lock_acquire (&fs_lock);
   file_close (file);
   lock_release (&fs_lock);
+}
+
+mapid_t
+sys_mmap (int fd, void *addr)
+{
+  struct thread *t;
+  struct file *f;
+  page_entry *p;
+  int i, j;
+  int mapid;
+  off_t size;
+  t = thread_current ();
+  fd = valid_index (fd);
+  bool safe = true;
+  
+  if (fd < 0)
+    return -1;
+  f = t->fds[fd];
+  if (size = file_length (f) == 0)
+    return -1;
+  if(addr != pg_round_down (addr))
+    return -1;
+
+  for(i = 0; i < MAPPINGSMAX && t->mappings[i]; i++);
+  t->mappings[i] = addr;
+  
+  mapid = i;
+
+  off_t size_temp = size / 4096;
+
+  for (i = 0; i < size_temp && safe; i++)
+  {
+    safe = page_insert_entry_mmap (addr + i*4096, f, i*4096, 4096, false) == NULL;
+  }
+  if(safe)
+    page_insert_entry_mmap (addr + i*4096, f, i * 4096 , size % 4096, true);
+  else
+  {
+    for(j = 0; j < i; j++)
+    {
+      page_remove_address (addr + j*4096);
+    }
+    mapid = -1;
+  }
+    
+  return mapid;
+}
+
+void
+sys_unmmap (mapid_t mapping)
+{
+  struct thread *t = thread_current ();
+  void *mmap = t->mappings[mapping];
+  page_entry mmap_page;
+  
+  if (mmap == NULL)
+    return;
+
+  do
+  {
+    mmap_page = page_get_entry (mmap);
+    if(is_in_frame(mmap_page->meta))
+
+  } while (is_mmap_final(mmap_page->meta));
+
 }
 
 /* Valid_index is a helper function designed to 
