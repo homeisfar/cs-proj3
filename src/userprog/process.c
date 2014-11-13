@@ -171,10 +171,7 @@ void hash_func (struct hash_elem *e, void *a )
 {
   struct thread *t = thread_current ();
   page_entry *pe = hash_entry(e, page_entry, page_elem);
-  //TODO: remove from FRAME && SWAP (frame_clear_page () && swap_clear_page ())
-
-
-
+  swap_release (pe->swap_index);
   pagedir_clear_page (t->pagedir, pe->upage);
 
   if(is_in_frame (pe->meta))

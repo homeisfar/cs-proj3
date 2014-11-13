@@ -28,15 +28,6 @@
 #define clear_writeable(x) ((x) &= ~16)
 #define clear_stack(x) ((x) &= ~32)
 
-/*
-	We also want to keep track in our supp table of:
-
-	Files that are open || struct array?
-	Offsets in said files || uint32 array?
-	Does this information need to be malloc'd and free?
-
-*/
-
 typedef struct page_entry {
 	struct hash_elem page_elem;
 	uint8_t meta;

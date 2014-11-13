@@ -176,9 +176,6 @@ syscall_handler (struct intr_frame *f UNUSED)
       valid_ptr (f->esp);
       valid_ptr (arg1);
       valid_buf_ptr(arg1);
-      //TODO: Figure out how to make this not stupid.
-        // if (!is_writeable(page_get_entry (&t->page_table_hash, pg_round_down(arg1))->meta))
-    // sys_exit(-1);
       f->eax = sys_read (arg0, arg1, arg2);
       break;
     }

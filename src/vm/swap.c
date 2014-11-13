@@ -63,5 +63,5 @@ swap_acquire ()
 void
 swap_release (size_t bit_idx)
 {
-	bitmap_flip (swap_bitmap, bit_idx);
+	bitmap_set (swap_bitmap, bit_idx, 0);
 }

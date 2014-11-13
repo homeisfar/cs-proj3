@@ -21,23 +21,6 @@
 
 #define PAGE_DIR_MAX 1 << 10
 
-//still needed to do 4:14PM Nov 1st
-/*
-Use bitmap to scan for available pages and contiguous regions of memory
-Create function to create entry in Supp table (and set bits on bitmap)
-Create function to remove entry from supp table and unset bits
-
-//METADATA TO KEEP TRACK OF:
-1) Is the memory allocated?
-2) Is the memory in frame?
-3) Is the memory writeable?
-
-On thread exits:
-clear page table pagedir_clear_page
-destroy hash table
-
-*/
-
 unsigned
 page_hash (const struct hash_elem *p_, void *aux UNUSED)
 {
