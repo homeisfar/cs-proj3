@@ -191,6 +191,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->esp = pop (f->esp, (void *)&arg2, sizeof (uint32_t));
       valid_ptr (f->esp);
       valid_ptr (arg1);
+      valid_buf_ptr (arg1);
       f->eax = sys_write (arg0, arg1, arg2);
       break;
     }
