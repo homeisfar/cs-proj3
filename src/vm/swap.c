@@ -30,8 +30,7 @@ swap_init ()
 {
 	b = block_get_role (BLOCK_SWAP);
 	num_of_swap_pages = block_size (b) / 8;
-	//PANIC("%d\n", num_of_swap_pages);
-	swap_bitmap = bitmap_create(num_of_swap_pages);
+	swap_bitmap = bitmap_create (num_of_swap_pages);
 	if (!swap_bitmap)
 		PANIC ("Swap bitmap failed to initialize");
 }
@@ -42,7 +41,7 @@ swap_read (block_sector_t sector, void *buffer)
 	sector *= 8;
 	int i = 0;
 	for (; i < 8; i++)
-		block_read (b, sector + i, (char *)buffer + i * 512);
+		block_read (b, sector + i, (char *) buffer + i * 512);
 	swap_release (sector/8);
 }
 
@@ -52,7 +51,7 @@ swap_write (block_sector_t sector, void *buffer)
 	sector *= 8;
 	int i = 0;
 	for (; i < 8; i++)
-		block_write (b, sector + i, (char *)buffer + i * 512);
+		block_write (b, sector + i, (char *) buffer + i * 512);
 }
 
 size_t
@@ -66,18 +65,3 @@ swap_release (size_t bit_idx)
 {
 	bitmap_flip (swap_bitmap, bit_idx);
 }
-
-/*
-
-size_t
-page_obtain_pages (struct bitmap *page_map, size_t start, size_t cnt)
-{
- size_t start_bit;
- while((start_bit = bitmap_scan_and_flip (page_map, start, cnt, 0)) == BITMAP_ERROR)
- {
- //resize bitmap not yet implemented
- }
- return start_bit;
-}
-
-*/

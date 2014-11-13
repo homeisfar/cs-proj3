@@ -8,11 +8,11 @@
 #include <filesys/file.h>
 
 #define is_in_frame(x) ((x) & 1)		/* Tells us if it's in frame */
-#define is_in_fs(x) ((x) & 2)	/* More specifically, if it is in fs */
+#define is_in_fs(x) ((x) & 2)			/* More specifically, if it is in fs */
 #define is_in_swap(x) ((x) & 4)
-#define is_zero_pages(x) ((x) & 8)/* User is requesting all 0 pages */
-#define is_writeable(x) ((x) & 16)	/* Page can be written to. Useful for shared memory */
-#define is_stack(x) ((x) & 32)	/* Is the page a stack page? For stack growth */
+#define is_zero_pages(x) ((x) & 8)		/* User is requesting all 0 pages */
+#define is_writeable(x) ((x) & 16)		/* Page can be written to. Useful for shared memory */
+#define is_stack(x) ((x) & 32)			/* Is the page a stack page? For stack growth */
 
 #define set_in_frame(x) ((x) |= 1)
 #define set_fs(x) ((x) |= 2)
@@ -27,6 +27,7 @@
 #define clear_zero_pages(x) ((x) &= ~8)
 #define clear_writeable(x) ((x) &= ~16)
 #define clear_stack(x) ((x) &= ~32)
+
 /*
 	We also want to keep track in our supp table of:
 
@@ -36,11 +37,7 @@
 
 */
 
-typedef struct page_entry{
-  // uint32_t * page_ptr;
-	 // bool dirty_bit = pagedir_is_dirty (pagedir, page);
-  // bool reference_bit bad code
-	// void *vaddr;
+typedef struct page_entry {
 	struct hash_elem page_elem;
 	uint8_t meta;
 	struct file *f;
@@ -50,20 +47,7 @@ typedef struct page_entry{
     uint32_t zero_bytes;
     void *phys_page;
     size_t swap_index;
-	
-	/*
-		swap meta data
-	*/
 } page_entry;
-
-// typedef struct page_dir
-// {
-//     // meta-data
-//     uint32_t *pd;
-//     page_entry *pages;
-// } page_dir;
-
-
 
 void vm_init (size_t user_page_limit);
 void *vm_get_page (enum palloc_flags);

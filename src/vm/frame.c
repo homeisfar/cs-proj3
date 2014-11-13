@@ -53,7 +53,6 @@ init_frame_table ()
  	uint8_t *free_end = ptov (init_ram_pages * PGSIZE);
  	size_t free_pages = (free_end - free_start) / PGSIZE;
  	user_pages = free_pages / 2 - 1;
- 	//PANIC("User pages: %lu\n", user_pages);
 	frame_table = calloc (user_pages, sizeof (frame_entry));
 	lock_init (&frame_lock);
 }
@@ -66,53 +65,45 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 	page = palloc_get_page (PAL_USER);
 	if (!page)
 	{
-		page = frame_evict_page();//eviction here
+		lock_acquire (&frame_lock);
+		page = frame_evict_page ();
+		lock_release (&frame_lock);
+
 		// check if page is NULL
 		if (!page)
 			return 0;
 	}
 
-	uint32_t index = index((int) page);
-	//printf("ACQUIRED REG PAGE: %d\n", index);
+	uint32_t index = index ((int) page);
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = page;
 	frame_table[index].page_dir_entry = fault_entry;
 	fault_entry->phys_page = page;
-	set_in_frame(frame_table[index].page_dir_entry->meta);
+	set_in_frame (frame_table[index].page_dir_entry->meta);
 	return pagedir_set_page (pd, upage, page, writable);
 }
 
-
-
-
 /* Obtain a frame for a stack page */
-// should work for valid, non-eviction cases in current state,
-// assuming that page_insert_entry_exec and frame_get_page are correctly implemented
-
 void *
 frame_get_stack_page (void * vaddr)
 {
 	void *kpage;
-	uint8_t *upage = pg_round_down (vaddr); // used in supp.p.t. also
+	uint8_t *upage = pg_round_down (vaddr);
 	kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-
 
 	if (!kpage)
 	{
 		lock_acquire (&frame_lock);
-		kpage = frame_evict_page(); // eviction here
+		kpage = frame_evict_page ();
 		lock_release (&frame_lock);
 		if (!kpage)
 			return NULL;
 	}
 
-	uint32_t index = index((int) kpage);
-	//printf("ACQUIRED STACK PAGE: %lu\n", index);
-
+	uint32_t index = index ((int) kpage);
 
 	// create supplemental page table entry
-	ASSERT ( page_insert_entry_stack (upage) == NULL);
-
+	ASSERT (page_insert_entry_stack (upage) == NULL);
 	page_entry *fault_entry = page_get_entry (&thread_current ()->page_table_hash, upage);
 	
 
@@ -136,10 +127,7 @@ void
 frame_clear_page (int frame_index, uint32_t *pd)
 {
 	clear_in_frame (frame_table[frame_index].page_dir_entry->meta);
-	//frame_table[frame_index].page = NULL;
-
-	//palloc_free_page (frame_table[frame_index].page);
-	pagedir_clear_page(pd, frame_table[frame_index].page_dir_entry->upage);
+	pagedir_clear_page (pd, frame_table[frame_index].page_dir_entry->upage);
 	frame_table[frame_index].page_dir_entry = NULL;
 }
 
@@ -148,29 +136,15 @@ uintptr_t *
 frame_evict_page () 
 {
 	static int clock_hand = 0;
-	// printf("Evicted\n");
-	// return NULL;
-	// eviction algorithm goes here
-	// for now, panic/fail
-	// only goes into swap if dirty
-	
 	uint32_t *pd = thread_current ()->pagedir;
 	void *evict_frame = NULL;
 	while (evict_frame == NULL)
 	{
-		// if(!frame_table[clock_hand].page_dir_entry) 
-		// {
-		// 	PANIC("%d\n", clock_hand);
-		// 	clock_hand = (clock_hand + 1) % user_pages;/
-		// 	continue;
-		// }
-
-		//reference bit 
-		if (pagedir_is_accessed(pd, frame_table[clock_hand].page))
+		// check reference bit 
+		if (pagedir_is_accessed (pd, frame_table[clock_hand].page))
 		{
-			//set reference to 0
-			pagedir_set_accessed(pd, frame_table[clock_hand].page, 0);
-			clock_hand = (clock_hand + 1) % user_pages;
+			// set reference to 0
+			pagedir_set_accessed (pd, frame_table[clock_hand].page, 0);
 		}
 		else 
 		{
@@ -181,26 +155,15 @@ frame_evict_page ()
 				if (index == BITMAP_ERROR)
 					PANIC ("OUT OF SWAP SPACE");
 
-				//update supp table for swap index
 				frame_table[clock_hand].page_dir_entry->swap_index = index;
-				//write to swap
 				swap_write (index, frame_table[clock_hand].page);
-				set_in_swap(frame_table[clock_hand].page_dir_entry->meta);
-
-				// if (swap_find_free())
-			//swap to swap area
-			//if swap table is full, panic
+				set_in_swap (frame_table[clock_hand].page_dir_entry->meta);
 			}
-			//else just clear out the page
-
-			//updates to frame, supplemental page table, pagedir
+			// clear page and update frame, supplemental page table, pagedir
 			frame_clear_page (clock_hand, pd);
 			evict_frame = frame_table[clock_hand].page;
-			clock_hand = (clock_hand + 1) % user_pages;
 		}
+		clock_hand = (clock_hand + 1) % user_pages;
 	}
 	return evict_frame;
-	
-	// pagedir_clear_page (uint32_t *pd, void *upage) 
-
 }

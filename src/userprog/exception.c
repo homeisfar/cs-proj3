@@ -164,37 +164,24 @@ page_fault (struct intr_frame *f)
   void *fault_addr_rounded = pg_round_down (fault_addr);
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
-
-  // if(!not_present)
-    // kill (f);
   
   // Stack Growth
   if (!fault_entry) 
   {
-    // printf("STACK GROWTH\n");
-    // check if 'should be' a stack access -> stack growth
-    // should impose absolute limit on stack size - maybe 8MB
     uintptr_t *esp = t->esp ? (uintptr_t) t->esp : (uintptr_t) f->esp;
-    // printf("<1>\n");
-    // printf("faulting addr: %p, esp: %p\n", fault_addr, esp);
     if (((uintptr_t) fault_addr >= esp - 32) && (fault_addr < PHYS_BASE))
     {
-      // printf("<2>\n");
       uint8_t *kpage;
       bool success = false;
-
       kpage = frame_get_stack_page (fault_addr);
       if (kpage != NULL)
       {
-        // printf("<3>\n");
         success = pagedir_set_page (t->pagedir, pg_round_down (fault_addr), kpage, true);
         if (success) {
-          // printf("Successful stack growth\n");
-          return;// continue on? return?
+          return;
         }
       }
     } 
-    // printf("Invalid access?\n");
     kill (f);
   }
   
@@ -202,26 +189,17 @@ page_fault (struct intr_frame *f)
 
   if (!writeable && write)
     kill (f);
-
-  // if (user && write && !writeable)
-    // kill (f);
-
-  // if (!not_present && writeable && write)
-    // kill (f);
   //Load from FS or swap
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
-    // printf("<6>\n");
     kill (f);
   }  
   //check if it's in swap
   else if (is_in_swap (fault_entry->meta))
   {
-    // PANIC ("WE ARE CHECKING TO SEE IF IT IS IN SWAP");
       uint8_t *kpage = fault_entry->phys_page;
       if (kpage == NULL)
       { 
-        // printf("<5>\n");
         kill (f);
       }
 
@@ -238,7 +216,6 @@ page_fault (struct intr_frame *f)
 
       if (kpage == NULL)
       { 
-        // printf("<5>\n");
         kill (f);
       }
           
@@ -246,39 +223,12 @@ page_fault (struct intr_frame *f)
       file_seek (fault_entry->f, fault_entry->ofs);
       if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
       {
-        // printf("<4>\n");
-        // palloc_free_page (kpage); // IS THIS VERY WRONG OR KIND OF WRONG?
         kill (f); 
       }
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
-
-      /* Add the page to the process's address space. */
-      // if (!install_page (fault_entry->upage, kpage, fault_entry->writable)) 
-      // {
-      //     palloc_free_page (kpage);
-      //     kill (f); 
-      // }
-      // printf("Going to loop; kpage = %p \n", kpage);
-
   } 
   else
   {
-    // printf("<3>\n");
-    kill(f);
+    kill (f);
   }
-  // printf("Kpage should exist if you get here\n");
-  // printf("Faulting address %p \n", fault_addr);
-  // printf("Number of page faults %i \n", page_fault_cnt);
-  /* To implement virtual memory, delete the rest of the function
-     body, and replace it with code that brings in the page to
-     which fault_addr refers. */
-  // printf ("Page fault at %p: %s error %s page in %s context.\n",
-  //         fault_addr,
-  //         not_present ? "not present" : "rights violation",
-  //         write ? "writing" : "reading",
-  //         user ? "user" : "kernel");
-
-  // printf("There is no crying in Pintos!\n");
-
-
 }

@@ -21,12 +21,6 @@
 
 #define PAGE_DIR_MAX 1 << 10
 
-
-
-// uint32_t **page_dir_supp;
-// page_entry *page_entry_supp;
-
-
 //still needed to do 4:14PM Nov 1st
 /*
 Use bitmap to scan for available pages and contiguous regions of memory
@@ -43,7 +37,6 @@ clear page table pagedir_clear_page
 destroy hash table
 
 */
-
 
 unsigned
 page_hash (const struct hash_elem *p_, void *aux UNUSED)
@@ -69,7 +62,7 @@ page_get_entry (struct hash *page_table, void *fault_addr)
   page_entry pe;
   pe.upage = fault_addr;
   struct hash_elem *elem = hash_find (page_table, &pe.page_elem);
-  return elem ? hash_entry(elem, page_entry, page_elem) : NULL;
+  return elem ? hash_entry (elem, page_entry, page_elem) : NULL;
 }
 
 
@@ -80,9 +73,7 @@ page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
     page_entry *page_entry_supp = calloc (1, sizeof (page_entry));
     struct thread *t = thread_current ();
     struct hash *pages = &t->page_table_hash;
-    // if(!page_entry_supp)
 
-    //ASSERT (page_entry_supp);
     page_entry_supp->f = file;
     page_entry_supp->ofs = ofs;
     page_entry_supp->upage = upage;
@@ -113,12 +104,5 @@ page_remove_entry (struct hash_elem *page_elem)
 {
     struct thread *t = thread_current ();
     struct hash pages = t->page_table_hash;
-    // page_entry *p = t->supp_page_data; //potentially bad
     return hash_delete (&pages, page_elem);
 }
-
-
-//resize bitmap function call ()
-
-// struct hash_elem *
-// page_insert (struct hash *, struct hash_elem *);
