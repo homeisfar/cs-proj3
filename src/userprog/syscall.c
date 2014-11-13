@@ -624,7 +624,9 @@ sys_unmmap (mapid_t mapping)
   do
   {
     mmap_page = page_get_entry (mmap);
-    if(is_in_frame(mmap_page->meta))
+    if (is_in_frame(mmap_page->meta)) {
+      if ()
+    }
 
   } while (is_mmap_final(mmap_page->meta));
 
