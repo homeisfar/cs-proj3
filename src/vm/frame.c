@@ -19,6 +19,7 @@
 #include "threads/vaddr.h"
 #include "threads/loader.h"
 #include "threads/malloc.h"
+#include "threads/synch.h"
 
 /* Student code */
 #include "vm/page.h"
@@ -32,8 +33,9 @@
 #define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) \
 ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
 
-int ii = 0;
 size_t user_pages;
+
+static struct lock frame_lock;
 /* Create a frame table that has 2^20 frame entries,
    or the size of physical memory */ 
 frame_entry *frame_table;
@@ -53,6 +55,7 @@ init_frame_table ()
  	user_pages = free_pages / 2 - 1;
  	//PANIC("User pages: %lu\n", user_pages);
 	frame_table = calloc (user_pages, sizeof (frame_entry));
+	lock_init (&frame_lock);
 }
 
 /* Obtain a single frame */
@@ -96,7 +99,9 @@ frame_get_stack_page (void * vaddr)
 
 	if (!kpage)
 	{
+		lock_acquire (&frame_lock);
 		kpage = frame_evict_page(); // eviction here
+		lock_release (&frame_lock);
 		if (!kpage)
 			return NULL;
 	}
@@ -130,8 +135,6 @@ frame_get_stack_page (void * vaddr)
 void
 frame_clear_page (int frame_index, uint32_t *pd)
 {
-	ii++;
-
 	clear_in_frame (frame_table[frame_index].page_dir_entry->meta);
 	//frame_table[frame_index].page = NULL;
 
@@ -158,7 +161,7 @@ frame_evict_page ()
 		// if(!frame_table[clock_hand].page_dir_entry) 
 		// {
 		// 	PANIC("%d\n", clock_hand);
-		// 	clock_hand = (clock_hand + 1) % user_pages;
+		// 	clock_hand = (clock_hand + 1) % user_pages;/
 		// 	continue;
 		// }
 

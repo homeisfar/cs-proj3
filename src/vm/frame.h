@@ -15,7 +15,7 @@ typedef struct frame_entry
 } frame_entry;
 
 frame_entry *frame_table;
-extern int ii;
+
 bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_stack_page(void *);
 void *frame_get_multiple (enum palloc_flags, size_t);

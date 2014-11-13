@@ -13,6 +13,7 @@
 #include "lib/kernel/console.h"
 #include "threads/synch.h"
 #include "devices/input.h"
+#include "vm/page.h"
 
 static void syscall_handler (struct intr_frame *);
 /* Project created methods */
@@ -57,6 +58,16 @@ valid_ptr (const void *usrdata)
   if (!(page_get_entry (&t->page_table_hash, usrdata_rounded) 
     || ((uintptr_t) usrdata >= t->esp - 32) && (usrdata < PHYS_BASE)))
     sys_exit(-1);
+}
+
+void
+valid_buf_ptr (const void *usrdata)
+{
+  struct thread *t = thread_current ();
+  if (page_get_entry (&t->page_table_hash, pg_round_down(usrdata)) != NULL && 
+    !is_writeable(page_get_entry (&t->page_table_hash, pg_round_down(usrdata))->meta))
+     sys_exit(-1);
+
 }
 
 /* Initialize the system call handler and the file system lock. */
@@ -164,6 +175,10 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->esp = pop (f->esp, (void *) &arg2, sizeof (uint32_t));
       valid_ptr (f->esp);
       valid_ptr (arg1);
+      valid_buf_ptr(arg1);
+      //TODO: Figure out how to make this not stupid.
+        // if (!is_writeable(page_get_entry (&t->page_table_hash, pg_round_down(arg1))->meta))
+    // sys_exit(-1);
       f->eax = sys_read (arg0, arg1, arg2);
       break;
     }

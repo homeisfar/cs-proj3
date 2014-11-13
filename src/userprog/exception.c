@@ -108,7 +108,7 @@ kill (struct intr_frame *f)
          may cause kernel exceptions--but they shouldn't arrive
          here.)  Panic the kernel to make the point.  */
       intr_dump_frame (f);
-      PANIC ("Kernel bug - unexpected interrupt in kernel: %d\n", ii); 
+      PANIC ("Kernel bug - unexpected interrupt in kernel"); 
 
     default:
       /* Some other code segment?  Shouldn't happen.  Panic the
@@ -164,6 +164,9 @@ page_fault (struct intr_frame *f)
   void *fault_addr_rounded = pg_round_down (fault_addr);
 
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
+
+  // if(!not_present)
+    // kill (f);
   
   // Stack Growth
   if (!fault_entry) 
@@ -197,7 +200,14 @@ page_fault (struct intr_frame *f)
   
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
 
+  if (!writeable && write)
+    kill (f);
 
+  // if (user && write && !writeable)
+    // kill (f);
+
+  // if (!not_present && writeable && write)
+    // kill (f);
   //Load from FS or swap
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
