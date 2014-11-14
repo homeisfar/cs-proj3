@@ -1,152 +1,126 @@
-10/6, 7:00p - 10:00p Ali, Brandon, Charling, Danny, 3 hours
-Driver Order and Time Length:
-Ali, 30 minutes
-Brandon, 30 minutes
+10/24, 2:00 - 5:00p, Ali, Brandon, Charling, Danny, 3 hours
+Danny, 30 minutes
 Charling, 30 minutes
-Danny, 30 minutes
+Brandon, 30 minutes
 Ali, 30 minutes
-Brandon, 30 minutes
-
-10/8, 3:00p - 5:00p Brandon, Charling, Danny, 2 hours
-Driver Order and Time Length:
-Brandon, 30 minutes
-Charling, 30 minutes
 Danny, 30 minutes
-Brandon, 30 minutes
-
-10/8, 7:00p - 10:00p Ali, Brandon, Charling, Danny, 3 hours
-Driver Order and Time Length:
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-
-10/8, 10:00p - 11:00p Ali, Brandon, Danny, 1 hour
-Driver Order and Time Length:
-Ali, 30 minutes
-Brandon, 30 minutes
-
-10/9, 2:00p - 8:30p Ali, Brandon, Danny, Charling, 6.5 hours
-Driver Order and Time Length:
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-
-10/10, 2:00p - 9:00p Ali, Brandon, Charling, Danny, 7 hours
-Driver Order and Time Length:
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-
-10/11, 3:00p - 8:00p Ali, Brandon, Charling, Danny, 5 hours
-Driver Order and Time Length:
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-
-10/13, 7:00p - 10:30p Ali, Brandon, Charling, Danny, 3.5 hours
-Driver Order and Time Length:
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
 Charling, 30 minutes
 
-10/14, 2:00p - 5:30p Ali, Brandon, Charling, 3.5 hours
-Driver Order and Time Length:
+10/25, 2:00 - 5:00p, Ali, Brandon, Charling, Danny, 3 hours
 Brandon, 30 minutes
-Charling, 30 minutes
 Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-
-10/15, 7:00p - 9:45p Ali, Charling, 2.75 hours
-Driver Order and Time Length:
-Charling, 30 minutes
-Ali, 30 minutes
-Charling, 30 minutes
-Ali, 30 minutes
-Charling, 30 minutes
-Ali, 15 minutes
-
-10/17, 12:00p - 9:00p Ali, Brandon, Charling, Danny, 9 hours
-Driver Order and Time Length:
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
 Danny, 30 minutes
-Ali, 30 minutes
+Charling, 30 minutes
 Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Brandon, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Charling, 30 minutes
-
-10/18, 1:30p - 5:00p Ali, Charling, Danny, 3.5 hours
-Driver Order and Time Length:
-Ali, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
-Ali, 30 minutes
-Charling, 30 minutes
-Danny, 30 minutes
 Ali, 30 minutes
 
-10/20, 7:00p - 9:00p Ali, Brandon, Charling, 2 hours
-Driver Order and Time Length:
-Ali, 30 minutes
+10/29, 7:00 - 9:30p, Ali, Brandon, Charling, 2.5 hours
 Brandon, 30 minutes
+Ali, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+
+10/30, 2:00 - 6:00p, Ali, Brandon, Charling, Danny, 4 hours
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+
+10/31, 2:00 - 6:00p, Ali, Brandon, Charling, Danny, 4 hours
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+
+11/1, 1:00 - 5:00p, Ali, Charling, Danny, 4 hours
+Danny, 30 minutes
+Charling, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Danny, 30 minutes
 Charling, 30 minutes
 Ali, 30 minutes
 
-10/21 2:30p - 6:00p Ali, Brandon 3.50 hours
-Ali, 30 mins
-Brandon, 30 mins
-Ali, 30 mins
-Brandon, 30 mins
-Ali, 30 mins
-Brandon, 30 mins
-Ali, 30 mins
+11/2, 5:00 - 6:30p, Ali, Charling, 1.5 hours
+Ali, 30 minutes
+Charling, 30 minutes
+Ali, 30 minutes
+
+11/3, 7:00 - 8:30p, Ali, Brandon, Charling, 1.5 hours
+Ali, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+
+11/5, 7:00 - 9:00p, Ali, Brandon, Charling, 2 hours
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Charling, 30 minutes
+
+11/6, 2:00 - 4:00p, Ali, Brandon, Charling, 2 hours
+Brandon, 30 minutes
+Ali, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+
+11/7, 3:00 - 6:00p, Ali, Brandon, Charling, Danny, 3 hours
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+
+11/8, 2:00 - 5:00p, Ali, Brandon, Charling, Danny, 3 hours
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+
+11/11, 1:00 - 6:30,  Ali, Charling, Danny, 5.5 hours
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+
+11/12, 7:00 - 9:30p, Ali, Brandon, Charling, 2.5 hours
+Brandon, 30 minutes
+Ali, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+
+11/13, 2:00 - 7:30p, Ali, Brandon, Charling, Danny, 5.5 hours
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+Danny, 30 minutes
+Charling, 30 minutes
+Brandon, 30 minutes
+Ali, 30 minutes
+
+
 
