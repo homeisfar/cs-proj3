@@ -82,7 +82,7 @@ page_insert_entry_stack (uint8_t *upage)
     return hash_insert (&pages, &page_entry_supp->page_elem);
 }
 
-
+/* For mmap data, we recycle read_bytes to record file size */
 struct hash_elem *
 page_insert_entry_mmap (uint8_t *upage, struct file *file, off_t file_ofs, 
                         off_t size, bool final)
@@ -92,8 +92,6 @@ page_insert_entry_mmap (uint8_t *upage, struct file *file, off_t file_ofs,
     struct hash pages = t->page_table_hash;
     page_entry_supp->ofs = file_ofs;
     page_entry_supp->f = file;
-    // if it is mmap data, we just recycle read_bytes
-    // read_bytes is the file size
     page_entry_supp->read_bytes = size;
     set_mmap (page_entry_supp->meta);
     set_mmap_final (page_entry_supp->meta);

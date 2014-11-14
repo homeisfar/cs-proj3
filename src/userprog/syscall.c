@@ -60,16 +60,16 @@ valid_ptr (const void *usrdata)
 
   if (!(page_get_entry (&t->page_table_hash, usrdata_rounded) 
     || ((uintptr_t) usrdata >= t->esp - 32) && (usrdata < PHYS_BASE)))
-    sys_exit(-1);
+    sys_exit (-1);
 }
 
 void
 valid_buf_ptr (const void *usrdata)
 {
   struct thread *t = thread_current ();
-  if (page_get_entry (&t->page_table_hash, pg_round_down(usrdata)) != NULL && 
-    !is_writeable(page_get_entry (&t->page_table_hash, pg_round_down(usrdata))->meta))
-     sys_exit(-1);
+  if (page_get_entry (&t->page_table_hash, pg_round_down (usrdata)) != NULL && 
+    !is_writeable (page_get_entry (&t->page_table_hash, pg_round_down (usrdata))->meta))
+     sys_exit (-1);
 
 }
 
@@ -240,7 +240,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       int arg0;
       f->esp = pop (f->esp, (void *) &arg0, sizeof (int));
       valid_ptr (f->esp);
-      sys_unmmap(arg0);
+      sys_unmmap (arg0);
       break;
     }
   }
@@ -587,17 +587,17 @@ sys_mmap (int fd, void *addr)
   t = thread_current ();
   fd = valid_index (fd);
   bool safe = true;
-  if (fd < 0 || !addr || !is_user_vaddr(addr))
+  if (fd < 0 || !addr || !is_user_vaddr (addr))
     return -1;
   if (!t->fds[fd])
     return -1;
-  f = file_reopen(t->fds[fd]);
+  f = file_reopen (t->fds[fd]);
   if ((size = file_length (f)) == 0)
     return -1;
-  if(addr != pg_round_down (addr))
+  if (addr != pg_round_down (addr))
     return -1;
 
-  for(i = 0; i < MAPPINGSMAX && t->mappings[i]; i++);
+  for (i = 0; i < MAPPINGSMAX && t->mappings[i]; i++);
   if (i >= MAPPINGSMAX)
     return -1;
   t->mappings[i] = addr;
@@ -608,13 +608,13 @@ sys_mmap (int fd, void *addr)
 
   for (i = 0; i < size_temp && safe; i++)
   {
-    safe = page_insert_entry_mmap (addr + i*4096, f, i*4096, 4096, false) == NULL;
+    safe = page_insert_entry_mmap (addr + i * 4096, f, i * 4096, 4096, false) == NULL;
   }
-  if(!safe || page_insert_entry_mmap (addr + i*4096, f, i * 4096 , size % 4096, true) != NULL)
+  if (!safe || page_insert_entry_mmap (addr + i * 4096, f, i * 4096 , size % 4096, true) != NULL)
   { 
-    for(j = 0; j < i; j++)
+    for (j = 0; j < i; j++)
     {
-      page_remove_address (addr + j*4096);
+      page_remove_address (addr + j * 4096);
     }
     mapid = -1;
   }
@@ -645,29 +645,13 @@ sys_unmmap (mapid_t mapping)
           file_write_at (mmap_page->f, mmap_page->phys_page, mmap_page->read_bytes, mmap_page->ofs);
       }
       /* clear frame */
-      //PANIC("INDEX: %d\n", index((uintptr_t)mmap));
-      frame_clear_page (index((uintptr_t)mmap_page->phys_page), t->pagedir);
+      frame_clear_page (index ((uintptr_t) mmap_page->phys_page), t->pagedir);
     }
-    page_remove_address(mmap);
+    page_remove_address (mmap);
     mmap += 4096;
-  } while (!is_mmap_final(mmap_page->meta));
-  t->mappings[mapping] = NULL;
-  ///* final page */
-  //mmap_page = page_get_entry (mmap);
-  ///* if in a frame */
-  //if (is_in_frame (mmap_page->meta)) 
-  //{ /* if dirty */
-  //  if (pagedir_is_dirty (t->pagedir, mmap_page)) 
-  //  {
-  //      /* write back */
-  //      file_write_at (mmap_page->f, mmap_page->phys_page, mmap_page->read_bytes, mmap->ofs);
-  //  }
-  //  /* clear frame */
-  //  frame_clear_page (index(mmap), t->pagedir);
-  //}
-  //page_remove_address(mmap);
-
-
+  } while (!is_mmap_final (mmap_page->meta));
+    t->mappings[mapping] = NULL;
+  return;
 }
 
 /* Valid_index is a helper function designed to 

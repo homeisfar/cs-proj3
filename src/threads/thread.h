@@ -152,8 +152,6 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-    // page_entry *supp_page_data;
-    // void *so_meta_wow;
 #endif
 
     void *esp;        /* esp pointer for syscall stack growth */
