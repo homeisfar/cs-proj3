@@ -116,7 +116,7 @@ page_remove_address (void *addr)
 {
     struct thread *t = thread_current ();
     struct hash pages = t->page_table_hash;
-    return page_remove_entry (&page_get_entry (pages, addr)->page_elem);
+    return page_remove_entry (&page_get_entry(&pages, addr)->page_elem);
 }
 
 

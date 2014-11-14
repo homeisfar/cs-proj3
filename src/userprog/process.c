@@ -176,8 +176,17 @@ void hash_func (struct hash_elem *e, void *a )
   swap_release (pe->swap_index);
   pagedir_clear_page (t->pagedir, pe->upage);
 
-  if(is_in_frame (pe->meta))
+  if (is_in_frame (pe->meta))
+  {
+    if (is_mmap(pe->meta)) {
+        //printf("Writing data at %p:\n%s\nto the filesystem\n", pe->upage, pe->phys_page);
+        file_write_at (pe->f, 
+            pe->phys_page, 
+            pe->read_bytes, 
+            pe->ofs); 
+    }
     palloc_free_page (pe->phys_page);
+  }
   free (pe);
 }
 

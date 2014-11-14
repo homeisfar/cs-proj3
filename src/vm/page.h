@@ -66,6 +66,12 @@ struct hash_elem *
 page_insert_entry_exec (struct file *, off_t, uint8_t *,
         uint32_t, uint32_t, bool);
 
+struct hash_elem *page_remove_entry (struct hash_elem *);
+
+struct hash_elem *page_remove_address (void *);
+
+
+
 extern page_entry *page_entry_supp;
 
 #endif /* vm/page.h */

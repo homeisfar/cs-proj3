@@ -193,7 +193,13 @@ page_fault (struct intr_frame *f)
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
   {
     kill (f);
-  }  
+  } 
+  //// check if is mmapped
+  //else if (is_mmap(fault_entry->meta))
+  //{
+  //    uint8_t *kpage = fault_entry->phys_page;
+  //    file_read_
+  //}
   //check if it's in swap
   else if (is_in_swap (fault_entry->meta))
   {
@@ -210,7 +216,7 @@ page_fault (struct intr_frame *f)
 
   }
   //check if it's in FS after swap
-  else if (is_in_fs (fault_entry->meta))
+  else if (is_in_fs (fault_entry->meta) || is_mmap(fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
 

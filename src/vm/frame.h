@@ -1,6 +1,10 @@
 #ifndef VM_FRAME_H
 #define VM_FRAME_H
 
+#define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) \
+ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
+
+
 /* Create a frame entry that contains the pointer to a page in physical
    memory and contains the page element */
 typedef struct frame_entry
