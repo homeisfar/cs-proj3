@@ -159,6 +159,7 @@ frame_evict_page ()
 				 
 				 if(is_mmap (current_page->meta))
 				 {
+                                        //pagedir_set_accessed(pd, frame_table[clock_hand].page, 0);
 					file_write_at (current_page->f, 
 						current_page->phys_page, 
 						current_page->read_bytes, 

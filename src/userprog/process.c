@@ -178,7 +178,7 @@ void hash_func (struct hash_elem *e, void *a )
 
   if (is_in_frame (pe->meta))
   {
-    if (is_mmap(pe->meta)) {
+    if (is_mmap(pe->meta) && pagedir_is_dirty(t->pagedir, pe->upage)) {
         //printf("Writing data at %p:\n%s\nto the filesystem\n", pe->upage, pe->phys_page);
         file_write_at (pe->f, 
             pe->phys_page, 

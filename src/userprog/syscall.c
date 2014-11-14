@@ -194,7 +194,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->esp = pop (f->esp, (void *)&arg2, sizeof (uint32_t));
       valid_ptr (f->esp);
       valid_ptr (arg1);
-      valid_buf_ptr (arg1);
+      //valid_buf_ptr (arg1);
       f->eax = sys_write (arg0, arg1, arg2);
       break;
     }
@@ -610,10 +610,8 @@ sys_mmap (int fd, void *addr)
   {
     safe = page_insert_entry_mmap (addr + i*4096, f, i*4096, 4096, false) == NULL;
   }
-  if(safe)
-    page_insert_entry_mmap (addr + i*4096, f, i * 4096 , size % 4096, true);
-  else
-  {
+  if(!safe || page_insert_entry_mmap (addr + i*4096, f, i * 4096 , size % 4096, true) != NULL)
+  { 
     for(j = 0; j < i; j++)
     {
       page_remove_address (addr + j*4096);
@@ -641,7 +639,7 @@ sys_unmmap (mapid_t mapping)
     /* if in a frame */
     if (is_in_frame (mmap_page->meta)) 
     { /* if dirty */
-      if (pagedir_is_dirty (t->pagedir, mmap_page)) 
+      if (pagedir_is_dirty (t->pagedir, mmap_page->upage)) 
       {
           /* write back */
           file_write_at (mmap_page->f, mmap_page->phys_page, mmap_page->read_bytes, mmap_page->ofs);
