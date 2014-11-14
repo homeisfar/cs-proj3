@@ -59,14 +59,12 @@ init_frame_table ()
 bool
 frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entry)
 {
+	lock_acquire (&frame_lock);
 	void *page;
 	page = palloc_get_page (PAL_USER);
 	if (!page)
 	{
-		lock_acquire (&frame_lock);
 		page = frame_evict_page ();
-		lock_release (&frame_lock);
-
 		// check if page is NULL
 		if (!page)
 			return 0;
@@ -78,7 +76,9 @@ frame_get_page (uint32_t *pd, void *upage, bool writable, page_entry *fault_entr
 	frame_table[index].page_dir_entry = fault_entry;
 	fault_entry->phys_page = page;
 	set_in_frame (frame_table[index].page_dir_entry->meta);
-	return pagedir_set_page (pd, upage, page, writable);
+	bool success = pagedir_set_page (pd, upage, page, writable);
+	lock_release (&frame_lock);
+	return success;
 }
 
 /* Obtain a frame for a stack page */
@@ -87,13 +87,13 @@ frame_get_stack_page (void * vaddr)
 {
 	void *kpage;
 	uint8_t *upage = pg_round_down (vaddr);
+	lock_acquire (&frame_lock);
+
 	kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
 	if (!kpage)
 	{
-		lock_acquire (&frame_lock);
 		kpage = frame_evict_page ();
-		lock_release (&frame_lock);
 		if (!kpage)
 			return NULL;
 	}
@@ -116,7 +116,7 @@ frame_get_stack_page (void * vaddr)
 	frame_table[index].page_dir_entry = fault_entry;
 	fault_entry->phys_page = kpage;
 	set_in_frame (frame_table[index].page_dir_entry->meta);
-	
+	lock_release (&frame_lock);
 	return kpage;
 }
 
@@ -124,7 +124,6 @@ frame_get_stack_page (void * vaddr)
 void
 frame_clear_page (int frame_index, uint32_t *pd)
 {
-        //PANIC("%d\n", frame_index);
 	clear_in_frame (frame_table[frame_index].page_dir_entry->meta);
 	pagedir_clear_page (pd, frame_table[frame_index].page_dir_entry->upage);
 	frame_table[frame_index].page_dir_entry = NULL;

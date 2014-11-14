@@ -209,7 +209,7 @@ page_fault (struct intr_frame *f)
 
   }
   //check if it's in FS after swap
-  else if (is_in_fs (fault_entry->meta) || is_mmap(fault_entry->meta))
+  else if (is_in_fs (fault_entry->meta) || is_mmap (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
 
