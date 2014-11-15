@@ -20,4 +20,5 @@ void *frame_get_stack_page (void *);
 void *frame_get_multiple (enum palloc_flags, size_t);
 void frame_free_multiple (void *, size_t);
 uintptr_t *frame_evict_page (void);
+void frame_clear_page (int, uint32_t *);
 #endif /* vm/frame.h */

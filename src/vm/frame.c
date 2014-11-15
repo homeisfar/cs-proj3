@@ -1,20 +1,5 @@
-#include "userprog/process.h"
 #include <debug.h>
-#include <inttypes.h>
-#include <round.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "userprog/gdt.h"
 #include "userprog/pagedir.h"
-#include "userprog/tss.h"
-#include "filesys/directory.h"
-#include "filesys/file.h"
-#include "filesys/filesys.h"
-#include "threads/flags.h"
-#include "threads/init.h"
-#include "threads/interrupt.h"
-#include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/loader.h"
@@ -39,7 +24,6 @@ static struct lock frame_lock;
 frame_entry *frame_table;
 bool frame_get_page (uint32_t *, void *, bool , page_entry *);
 void *frame_get_multiple (enum palloc_flags, size_t);
-void frame_clear_page (int, uint32_t *);
 uintptr_t *frame_evict_page ();
 
 /* Initialize the elements of the frame table allocating and clearing a
@@ -140,10 +124,8 @@ frame_evict_page ()
 	{
 		// check reference bit 
 		if (pagedir_is_accessed (pd, frame_table[clock_hand].page))
-		{
 			// set reference to 0
 			pagedir_set_accessed (pd, frame_table[clock_hand].page, 0);
-		}
 		else 
 		{
 			// if page is dirty, move to swap

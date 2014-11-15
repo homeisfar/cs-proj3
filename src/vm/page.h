@@ -55,23 +55,16 @@ void vm_free_multiple (void *, size_t page_cnt);
 void init_supp_page_dir (void);
 
 page_entry *page_get_entry (struct hash *, void *);
-
 unsigned page_hash (const struct hash_elem *p_, void *aux UNUSED);
-
 /* Returns true if page a precedes page b. */
 bool page_less (const struct hash_elem *a_, const struct hash_elem *b_,
-           void *aux UNUSED);
-
-struct hash_elem *
-page_insert_entry_exec (struct file *, off_t, uint8_t *,
-        uint32_t, uint32_t, bool);
-
+                void *aux UNUSED);
+struct hash_elem *page_insert_entry_exec (struct file *, off_t, uint8_t *,
+                                          uint32_t, uint32_t, bool);
+struct hash_elem *page_insert_entry_mmap (uint8_t *, 
+                struct file *, off_t, off_t, bool);
 struct hash_elem *page_remove_entry (struct hash_elem *);
-
 struct hash_elem *page_remove_address (void *);
-
-
-
 extern page_entry *page_entry_supp;
 
 #endif /* vm/page.h */

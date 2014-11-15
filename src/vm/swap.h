@@ -3,10 +3,10 @@
 
 #include "devices/block.h"
 
-void swap_init ();
+void swap_init (void);
 void swap_read (block_sector_t, void *);
 void swap_write (block_sector_t, void *);
-size_t swap_acquire ();
+size_t swap_acquire (void);
 void swap_release (size_t);
 
 #endif /* vm/swap.h */

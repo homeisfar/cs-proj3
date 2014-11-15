@@ -20,12 +20,14 @@
 
 #include "vm/frame.h"
 #include "threads/malloc.h"
+#include "vm/swap.h"
 
 /* Padding to byte align the user's stack */
 #define PADDING(x) ((sizeof (void *) - x) & (sizeof (void *) - 1))
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
+void hash_func (struct hash_elem *, void *);
 
 /* Delimiter for the command line tokenizer */
 static char delim[] = " \t";
@@ -99,10 +101,10 @@ start_process (void *file_name_)
     
     // init file descriptor table
     struct thread *t = thread_current();
-    t->fds = palloc_get_page(PAL_ZERO);
-    t->mappings = palloc_get_page(PAL_ZERO);
-    memset (t->fds, 0, FDMAX * sizeof (struct file *));
-    memset (t->mappings, 0, FDMAX * sizeof (void *));
+    t->fds = calloc (FDMAX, sizeof (struct file *));
+    t->mappings = calloc (MAPPINGSMAX, sizeof(void *));
+    // memset (t->fds, 0, FDMAX * sizeof (struct file *));
+    // memset (t->mappings, 0, FDMAX * sizeof (void *));
 
     hash_init (&t->page_table_hash, page_hash, page_less, NULL);
 
@@ -161,7 +163,7 @@ process_wait (tid_t child_tid UNUSED)
 }
 
 
-void hash_func (struct hash_elem *e, void *a )
+void hash_func (struct hash_elem *e, void *a)
 {
   struct thread *t = thread_current ();
   page_entry *pe = hash_entry(e, page_entry, page_elem);
@@ -171,7 +173,6 @@ void hash_func (struct hash_elem *e, void *a )
   if (is_in_frame (pe->meta))
   {
     if (is_mmap(pe->meta) && pagedir_is_dirty(t->pagedir, pe->upage)) {
-        //printf("Writing data at %p:\n%s\nto the filesystem\n", pe->upage, pe->phys_page);
         file_write_at (pe->f, 
             pe->phys_page, 
             pe->read_bytes, 
@@ -210,8 +211,8 @@ process_exit (void)
         pagedir_destroy (pd);
     }
     // free file descriptor table
-    palloc_free_page(cur->fds);
-    palloc_free_page(cur->mappings);
+    free (cur->fds);
+    free (cur->mappings);
 }
 
 /* Sets up the CPU for running user code in the current
@@ -495,18 +496,6 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
 
    Return true if successful, false if a memory allocation error
    or disk read error occurs. */
-void hash_print ()
-{
-  struct thread *t = thread_current ();
-  struct hash h = t->page_table_hash;
-  struct hash_iterator i;
-  hash_first (&i, &h);
-  while (hash_next (&i))
-    {
-      page_entry *f = hash_entry (hash_cur (&i), page_entry, page_elem);
-      printf ("upage: %p\n", f->upage);
-    }
-}
 
 static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
@@ -528,6 +517,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
         /* Get a page of memory. */
         void *whoa_nelly = page_insert_entry_exec (file, ofs, upage, 
           page_read_bytes, page_zero_bytes, writable);
+        ASSERT (!whoa_nelly);
 
         /* Advance. */
         read_bytes -= page_read_bytes;

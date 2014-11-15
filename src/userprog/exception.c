@@ -9,6 +9,7 @@
 #include "vm/frame.h"
 #include "vm/page.h"
 #include "vm/swap.h"
+#include "userprog/pagedir.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -177,9 +178,8 @@ page_fault (struct intr_frame *f)
       if (kpage != NULL)
       {
         success = pagedir_set_page (t->pagedir, pg_round_down (fault_addr), kpage, true);
-        if (success) {
+        if (success)
           return;
-        }
       }
     } 
     kill (f);
@@ -189,45 +189,35 @@ page_fault (struct intr_frame *f)
 
   if (!writeable && write)
     kill (f);
+
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
-  {
     kill (f);
-  } 
+
   //check if it's in swap
   else if (is_in_swap (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
       if (kpage == NULL)
-      { 
         kill (f);
-      }
 
       //time to load the page
       swap_read (fault_entry->swap_index, fault_entry->phys_page);
       clear_in_swap (fault_entry->meta);
       set_in_frame (fault_entry->meta);
-
   }
   //check if it's in FS after swap
   else if (is_in_fs (fault_entry->meta) || is_mmap (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
-
       if (kpage == NULL)
-      { 
         kill (f);
-      }
           
       /* Load this page. */
       file_seek (fault_entry->f, fault_entry->ofs);
       if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
-      {
         kill (f); 
-      }
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
   } 
   else
-  {
     kill (f);
-  }
 }

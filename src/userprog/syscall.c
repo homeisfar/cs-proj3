@@ -42,6 +42,9 @@ static off_t write_helper (struct file *, const void *, off_t);
 static void seek_helper (struct file *, off_t);
 static off_t tell_helper (struct file *);
 static void close_helper (struct file *);
+void valid_buf_ptr (const void *);
+mapid_t sys_mmap (int, void *);
+void sys_unmmap (mapid_t);
 
 static struct lock fs_lock;
 
@@ -68,7 +71,8 @@ valid_buf_ptr (const void *usrdata)
 {
   struct thread *t = thread_current ();
   if (page_get_entry (&t->page_table_hash, pg_round_down (usrdata)) != NULL && 
-    !is_writeable (page_get_entry (&t->page_table_hash, pg_round_down (usrdata))->meta))
+    !is_writeable (page_get_entry (&t->page_table_hash, 
+    pg_round_down (usrdata))->meta))
      sys_exit (-1);
 
 }
@@ -178,7 +182,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->esp = pop (f->esp, (void *) &arg2, sizeof (uint32_t));
       valid_ptr (f->esp);
       valid_ptr (arg1);
-      valid_buf_ptr(arg1);
+      valid_buf_ptr (arg1);
       f->eax = sys_read (arg0, arg1, arg2);
       break;
     }
@@ -194,7 +198,6 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->esp = pop (f->esp, (void *)&arg2, sizeof (uint32_t));
       valid_ptr (f->esp);
       valid_ptr (arg1);
-      //valid_buf_ptr (arg1);
       f->eax = sys_write (arg0, arg1, arg2);
       break;
     }
@@ -580,7 +583,6 @@ sys_mmap (int fd, void *addr)
 {
   struct thread *t;
   struct file *f;
-  page_entry *p;
   int i, j;
   int mapid;
   off_t size;
@@ -591,8 +593,11 @@ sys_mmap (int fd, void *addr)
     return -1;
   if (!t->fds[fd])
     return -1;
+  lock_acquire (&fs_lock);
   f = file_reopen (t->fds[fd]);
-  if ((size = file_length (f)) == 0)
+  size = file_length (f);
+  lock_release (&fs_lock);
+  if (size == 0)
     return -1;
   if (addr != pg_round_down (addr))
     return -1;
@@ -608,9 +613,11 @@ sys_mmap (int fd, void *addr)
 
   for (i = 0; i < size_temp && safe; i++)
   {
-    safe = page_insert_entry_mmap (addr + i * 4096, f, i * 4096, 4096, false) == NULL;
+    safe = page_insert_entry_mmap (addr + i * 4096, f, i * 4096,
+                                   4096, false) == NULL;
   }
-  if (!safe || page_insert_entry_mmap (addr + i * 4096, f, i * 4096 , size % 4096, true) != NULL)
+  if (!safe || page_insert_entry_mmap (addr + i * 4096, f, i * 4096, 
+                                       size % 4096, true) != NULL)
   { 
     for (j = 0; j < i; j++)
     {
@@ -642,7 +649,10 @@ sys_unmmap (mapid_t mapping)
       if (pagedir_is_dirty (t->pagedir, mmap_page->upage)) 
       {
           /* write back */
-          file_write_at (mmap_page->f, mmap_page->phys_page, mmap_page->read_bytes, mmap_page->ofs);
+          lock_acquire (&fs_lock);
+          file_write_at (mmap_page->f, mmap_page->phys_page, 
+                         mmap_page->read_bytes, mmap_page->ofs);
+          lock_release (&fs_lock);
       }
       /* clear frame */
       frame_clear_page (index ((uintptr_t) mmap_page->phys_page), t->pagedir);
