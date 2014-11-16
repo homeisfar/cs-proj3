@@ -17,6 +17,7 @@ typedef struct _proc {
     void *uaddr; /* start of file in process's virtual address space */
 } proc;
 
+ro_entry *share_find (struct inode *);
 void share_init ();
 void share_update (struct inode *, void *);
 void share_remove (struct inode *);

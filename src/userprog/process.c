@@ -198,7 +198,7 @@ process_exit (void)
 {
     struct thread *cur = thread_current ();
     uint32_t *pd;
-
+   // share_remove(file_get_inode(cur->self_executable));
     hash_destroy (&cur->page_table_hash, hash_func);
 
     /* Destroy the current process's page directory and switch back

@@ -183,9 +183,11 @@ page_fault (struct intr_frame *f)
         }
       }
     } 
+    //PANIC("Faulting addr: %p\n", fault_addr);
     kill (f);
   }
-  
+    
+
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
 
   if (!writeable && write)
@@ -218,6 +220,13 @@ page_fault (struct intr_frame *f)
       { 
         kill (f);
       }
+
+      /* iterate through shared_ro[inode]->procs */
+      if (!writeable && share_find(file_get_inode(fault_entry->f)))
+      {
+          //PANIC("I'm here");
+        share_install_frame(file_get_inode(fault_entry->f), kpage, fault_entry->ofs);
+      }
           
       /* Load this page. */
       file_seek (fault_entry->f, fault_entry->ofs);
@@ -227,11 +236,7 @@ page_fault (struct intr_frame *f)
       }
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
 
-      /* iterate through shared_ro[inode]->procs */
-      if (!writeable)
-      {
-        share_install_frame(file_get_inode(fault_entry->f), kpage, fault_entry->ofs);
-      }
+      
 
   } 
   else

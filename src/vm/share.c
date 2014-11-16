@@ -10,7 +10,6 @@ struct hash shared_ro;
 
 static unsigned share_hash (const struct hash_elem *_, void *);
 static bool share_less (const struct hash_elem *, const struct hash_elem *, void *);
-static ro_entry *find (struct inode *);
 static void insert (struct inode *, void *);
 static void update_existing (struct inode *, void *);
 
@@ -40,7 +39,7 @@ share_init ()
 }
 
 ro_entry *
-find (struct inode *inode) 
+share_find (struct inode *inode) 
 {
     ro_entry tmp;
     tmp.inode = inode;
@@ -69,7 +68,7 @@ insert (struct inode *inode, void *uaddr)
 void
 update_existing (struct inode *inode, void *uaddr)
 {
-    ro_entry *entry = find(inode);
+    ro_entry *entry = share_find(inode);
     ASSERT(entry);
 
     proc *new_proc = calloc(1, sizeof(proc));
@@ -84,7 +83,7 @@ share_update (struct inode *inode, void *uaddr)
     ASSERT(inode);
     ASSERT(uaddr);
 
-    if(find (inode))
+    if(share_find (inode))
         update_existing (inode, uaddr);
     else
         insert(inode, uaddr);
@@ -95,7 +94,7 @@ share_remove (struct inode *inode)
 {
     /*  */   
     struct thread *t = thread_current();
-    ro_entry *entry = find(inode);
+    ro_entry *entry = share_find(inode);
     ASSERT(entry);
 
     /* linear search */
@@ -115,7 +114,7 @@ share_remove (struct inode *inode)
     {
         hash_delete(&shared_ro, &entry->e);
         free(entry);
-        /* TODO: clear the frame */
+        /* TODO: clear the frame (maybe) */
     }
 }
 
@@ -127,7 +126,7 @@ share_install_frame (struct inode *inode, void *kpage, off_t ofs)
 {
     struct thread *t = thread_current();
 
-    ro_entry *entry = find(inode);
+    ro_entry *entry = share_find(inode);
     ASSERT(entry);
 
     /* linear search */
@@ -144,7 +143,17 @@ share_install_frame (struct inode *inode, void *kpage, off_t ofs)
         
         /* update supplemental page table */
         upage = p->uaddr + ofs; 
+        if(p == NULL)
+            PANIC ("PAGE_ENTRY IS NULL");
+        if(&p->t == NULL)
+            PANIC ("THREAD IS NULL");
+        if(&p->t->page_table_hash == NULL)
+            PANIC ("PAGE HASH IS NULL");
+        if(upage == NULL)
+            PANIC ("UPAGE IS NULL");
         page_entry *pentry = page_get_entry(&p->t->page_table_hash, upage);
+        if (pentry == NULL)
+            PANIC ("Pentry is NULL");
         set_in_frame(pentry->meta);
         pagedir_set_page(p->t->pagedir, upage, kpage, false);
     }
@@ -158,7 +167,7 @@ share_clear_frame (struct inode *inode, off_t ofs)
 {
     struct thread *t = thread_current();
 
-    ro_entry *entry = find(inode);
+    ro_entry *entry = share_find(inode);
     ASSERT(entry);
 
     /* linear search */
