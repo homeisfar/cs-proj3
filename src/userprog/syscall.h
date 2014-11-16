@@ -3,5 +3,6 @@
 
 void syscall_init (void);
 void sys_exit (int);
+struct file *open_helper (const char*);
 
 #endif /* userprog/syscall.h */

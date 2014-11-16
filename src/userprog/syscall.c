@@ -35,7 +35,7 @@ static void sys_unmmap (mapid_t);
 static void valid_ptr (const void*);
 static int valid_index (int);
 
-static struct file * open_helper (const char*);
+
 static off_t filesize_helper (struct file*);
 static off_t read_helper (struct file *, void *, off_t);
 static off_t write_helper (struct file *, const void *, off_t); 

@@ -21,6 +21,7 @@
 #include "vm/frame.h"
 #include "threads/malloc.h"
 #include "vm/swap.h"
+#include "userprog/syscall.h"
 
 /* Padding to byte align the user's stack */
 #define PADDING(x) ((sizeof (void *) - x) & (sizeof (void *) - 1))
@@ -325,7 +326,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     char *save_ptr;
     strlcpy (program, file_name, 15);
     strtok_r (program, delim, &save_ptr);
-    file = filesys_open (program);
+    file = open_helper (program);
     if (file == NULL) 
     {
         printf ("load: %s: open failed\n", file_name);
