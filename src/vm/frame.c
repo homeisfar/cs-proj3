@@ -137,6 +137,7 @@ frame_evict_page ()
 	static int clock_hand = 0;
 	uint32_t *pd = thread_current ()->pagedir;
 	void *evict_frame = NULL;
+        page_entry *current_page;
 	while (evict_frame == NULL)
 	{
 		// check reference bit 
@@ -147,6 +148,7 @@ frame_evict_page ()
 		}
 		else 
 		{
+                        current_page = frame_table[clock_hand].page_dir_entry;
 			// if page is dirty, move to swap
 			if (pagedir_is_dirty(pd, frame_table[clock_hand].page))
 			{
@@ -154,7 +156,6 @@ frame_evict_page ()
 				if (index == BITMAP_ERROR)
 					PANIC ("OUT OF SWAP SPACE");
 				
-				page_entry *current_page = frame_table[clock_hand].page_dir_entry;
 				current_page->swap_index = index;
 				 
 				 if(is_mmap (current_page->meta))
@@ -174,8 +175,14 @@ frame_evict_page ()
 
 			}
 			// clear page and update frame, supplemental page table, pagedir
+                        if (!is_writeable(current_page->meta)) {
+                            struct inode *inode = file_get_inode(current_page->f);
+                            share_clear_frame(inode, current_page->ofs);
+                        }
+
 			frame_clear_page (clock_hand, pd);
 			evict_frame = frame_table[clock_hand].page;
+                        
 		}
 		clock_hand = (clock_hand + 1) % user_pages;
 	}

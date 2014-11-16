@@ -19,6 +19,7 @@
 #include "threads/vaddr.h"
 
 #include "vm/frame.h"
+#include "vm/share.h"
 #include "threads/malloc.h"
 
 /* Padding to byte align the user's stack */
@@ -523,6 +524,10 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
     ASSERT (pg_ofs (upage) == 0);
     ASSERT (ofs % PGSIZE == 0);
+    
+    /* update share_ro */
+    if (!writable)
+        share_update(file_get_inode(file), upage);
 
     file_seek (file, ofs);
     while (read_bytes > 0 || zero_bytes > 0) 

@@ -1,5 +1,6 @@
 #include "lib/kernel/hash.h"
 #include "lib/kernel/list.h"
+#include "filesys/inode.h"
 
 
 extern struct hash shared_ro;
@@ -15,3 +16,10 @@ typedef struct _proc {
     struct thread *t;
     void *uaddr; /* start of file in process's virtual address space */
 } proc;
+
+void share_init ();
+void share_update (struct inode *, void *);
+void share_remove (struct inode *);
+void share_install_frame(struct inode *, void *, off_t);
+void share_clear_frame(struct inode *, off_t);
+

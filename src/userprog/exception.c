@@ -9,6 +9,7 @@
 #include "vm/frame.h"
 #include "vm/page.h"
 #include "vm/swap.h"
+#include "vm/share.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -225,6 +226,13 @@ page_fault (struct intr_frame *f)
         kill (f); 
       }
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
+
+      /* iterate through shared_ro[inode]->procs */
+      if (!writeable)
+      {
+        share_install_frame(file_get_inode(fault_entry->f), kpage, fault_entry->ofs);
+      }
+
   } 
   else
   {

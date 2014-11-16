@@ -2,12 +2,19 @@
 #include <stdlib.h>
 #include "threads/malloc.h"
 #include "threads/thread.h"
+#include "vm/page.h"
+#include "vm/frame.h"
+#include "userprog/pagedir.h"
 
 struct hash shared_ro;
 
 static unsigned share_hash (const struct hash_elem *_, void *);
 static bool share_less (const struct hash_elem *, const struct hash_elem *, void *);
+static ro_entry *find (struct inode *);
+static void insert (struct inode *, void *);
+static void update_existing (struct inode *, void *);
 
+/* begin code */
 unsigned
 share_hash (const struct hash_elem *p_, void *aux)
 {
@@ -72,7 +79,7 @@ update_existing (struct inode *inode, void *uaddr)
 }
 
 void 
-update (struct inode *inode, void *uaddr)
+share_update (struct inode *inode, void *uaddr)
 {
     ASSERT(inode);
     ASSERT(uaddr);
@@ -84,7 +91,7 @@ update (struct inode *inode, void *uaddr)
 }
 
 void
-remove (struct inode *inode)
+share_remove (struct inode *inode)
 {
     /*  */   
     struct thread *t = thread_current();
@@ -108,6 +115,69 @@ remove (struct inode *inode)
     {
         hash_delete(&shared_ro, &entry->e);
         free(entry);
+        /* TODO: clear the frame */
+    }
+}
+
+/* updates supplemental page metadata and sets the user->kernel page mapping
+ * for all other processes that reference the read-only file
+ * */
+void
+share_install_frame (struct inode *inode, void *kpage, off_t ofs)
+{
+    struct thread *t = thread_current();
+
+    ro_entry *entry = find(inode);
+    ASSERT(entry);
+
+    /* linear search */
+    proc *p;
+    struct list_elem *e;
+    void *upage;
+    for (e = list_begin (&entry->procs); e != list_end (&entry->procs);
+            e = list_next (e))
+    {
+        p = list_entry (e, proc, list_e);
+        /* skip current process */
+        if (p->t == t)
+            continue;
+        
+        /* update supplemental page table */
+        upage = p->uaddr + ofs; 
+        page_entry *pentry = page_get_entry(&p->t->page_table_hash, upage);
+        set_in_frame(pentry->meta);
+        pagedir_set_page(p->t->pagedir, upage, kpage, false);
+    }
+}
+
+/* updates supplemental page metadata and clears the user->kernel page mapping
+ * for all other processes that reference the read-only file
+ * */
+void
+share_clear_frame (struct inode *inode, off_t ofs)
+{
+    struct thread *t = thread_current();
+
+    ro_entry *entry = find(inode);
+    ASSERT(entry);
+
+    /* linear search */
+    proc *p;
+    struct list_elem *e;
+    void *upage;
+    for (e = list_begin (&entry->procs); e != list_end (&entry->procs);
+            e = list_next (e))
+    {
+        p = list_entry (e, proc, list_e);
+        /* skip current process */
+        if (p->t == t)
+            continue;
+        
+        /* update supplemental page table */
+        upage = p->uaddr + ofs; 
+        page_entry *pentry = page_get_entry(&p->t->page_table_hash, upage);
+        clear_in_frame(pentry->meta);
+        pagedir_clear_page(p->t->pagedir, upage);
     }
 }
 
