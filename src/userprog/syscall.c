@@ -66,6 +66,7 @@ valid_ptr (const void *usrdata)
     sys_exit (-1);
 }
 
+/* Special helper function to see if a buffer is valid */
 void
 valid_buf_ptr (const void *usrdata)
 {
@@ -578,6 +579,7 @@ close_helper (struct file *file)
   lock_release (&fs_lock);
 }
 
+/* Memmory maps a file pointed to by addr */
 mapid_t
 sys_mmap (int fd, void *addr)
 {
@@ -628,6 +630,8 @@ sys_mmap (int fd, void *addr)
   return mapid;
 }
 
+/* Unmaps a file. If not explicitly called, the file is unmapped
+ * when a process exits */
 void
 sys_unmmap (mapid_t mapping)
 {

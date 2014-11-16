@@ -163,7 +163,9 @@ process_wait (tid_t child_tid UNUSED)
     return exit_status;
 }
 
-
+/* Used for hash_destory in process_exit. This will completely
+   unmap every page indexed by the supplemental page table, free
+   the swap, munmap, and destory the hash table itself */
 void hash_func (struct hash_elem *e, void *a)
 {
   struct thread *t = thread_current ();
@@ -497,6 +499,9 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
 
    Return true if successful, false if a memory allocation error
    or disk read error occurs. */
+
+/* Updated to only create entries in a supplemental page table.
+   Data is loaded in only when a process page faults. */
 
 static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,

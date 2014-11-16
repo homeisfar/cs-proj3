@@ -1,6 +1,7 @@
 #ifndef VM_FRAME_H
 #define VM_FRAME_H
 
+/* Gets an index into the frame table based on the address given by palloc */
 #define index(x) (((x) - (int) ptov (1024 * 1024)) / PGSIZE - ((int) \
 ptov (init_ram_pages * PGSIZE) - (int) ptov (1024 * 1024)) / PGSIZE / 2 - 1)
 

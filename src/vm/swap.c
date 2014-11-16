@@ -8,6 +8,7 @@ struct bitmap *swap_bitmap;
 block_sector_t num_of_swap_pages; 
 struct block *b;
 
+/* Initializes the bitmap to reflect our swap space */
 void
 swap_init (void)
 {
@@ -18,6 +19,7 @@ swap_init (void)
 		PANIC ("Swap bitmap failed to initialize");
 }
 
+/* Read data out from swap */
 void
 swap_read (block_sector_t sector, void *buffer)
 {
@@ -28,6 +30,7 @@ swap_read (block_sector_t sector, void *buffer)
 	swap_release (sector/8);
 }
 
+/* Write data into the swap */
 void
 swap_write (block_sector_t sector, void *buffer)
 {
@@ -37,12 +40,14 @@ swap_write (block_sector_t sector, void *buffer)
 		block_write (b, sector + i, (char *) buffer + i * 512);
 }
 
+/* Set a bitmap index to tell us that "page" is taken */
 size_t
 swap_acquire (void)
 {
 	return bitmap_scan_and_flip (swap_bitmap, 0, 1, 0);
 }
 
+/* Unset a bitmap index to tell us that "page" is free */
 void
 swap_release (size_t bit_idx)
 {

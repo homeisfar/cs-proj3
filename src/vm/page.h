@@ -7,14 +7,17 @@
 #include <stdint.h>
 #include <filesys/file.h>
 
+/* The following bits are used in the "meta" entry in the page_entry
+    struct from below. We use this to tell us a little bit of information
+    while trying to remain memory efficient. */
 #define is_in_frame(x) ((x) & 1)		/* Tells us if it is in frame */
 #define is_in_fs(x) ((x) & 2)			/* Tells us if it is in filesystem */
 #define is_in_swap(x) ((x) & 4)         /* Tells us if is in swap */
 #define is_zero_pages(x) ((x) & 8)		/* User is requesting all 0 pages */
 #define is_writeable(x) ((x) & 16)		/* Page can be written to. Useful for shared memory */
 #define is_stack(x) ((x) & 32)			/* Is the page a stack page? */
-#define is_mmap(x) ((x) & 64)
-#define is_mmap_final(x) ((x) & 128)
+#define is_mmap(x) ((x) & 64)           /* Is the page an mmap page? */
+#define is_mmap_final(x) ((x) & 128)    /* Is the page the final mapped page for mmap? */
 
 #define set_in_frame(x) ((x) |= 1)
 #define set_fs(x) ((x) |= 2)
@@ -33,7 +36,6 @@
 #define clear_stack(x) ((x) &= ~32)
 #define clear_mmap(x) ((x) &= ~64)
 #define clear_mmap_final(x) ((x) &= ~128)
-
 
 typedef struct page_entry {
 	struct hash_elem page_elem;

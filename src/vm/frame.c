@@ -27,7 +27,7 @@ void *frame_get_multiple (enum palloc_flags, size_t);
 uintptr_t *frame_evict_page ();
 
 /* Initialize the elements of the frame table allocating and clearing a
-   set of memory */
+   set of memory. */
 void
 init_frame_table ()
 {
@@ -72,7 +72,6 @@ frame_get_stack_page (void * vaddr)
 	void *kpage;
 	uint8_t *upage = pg_round_down (vaddr);
 	lock_acquire (&frame_lock);
-
 	kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 
 	if (!kpage)
@@ -81,20 +80,17 @@ frame_get_stack_page (void * vaddr)
 		if (!kpage)
 			return NULL;
 	}
-
 	uint32_t index = index ((int) kpage);
 
 	// create supplemental page table entry
 	ASSERT (page_insert_entry_stack (upage) == NULL);
 	page_entry *fault_entry = page_get_entry (&thread_current ()->page_table_hash, upage);
 	
-
 	if (!fault_entry)
 	{
 		palloc_free_page (kpage);
 		return NULL;
 	}
-
 	// make frame entry point to supplemental page dir entry
 	frame_table[index].page = kpage;
 	frame_table[index].page_dir_entry = fault_entry;
@@ -137,22 +133,19 @@ frame_evict_page ()
 				
 				page_entry *current_page = frame_table[clock_hand].page_dir_entry;
 				current_page->swap_index = index;
-				 
-				 if(is_mmap (current_page->meta))
+
+				 if (is_mmap (current_page->meta))
 				 {
 					file_write_at (current_page->f, 
 						current_page->phys_page, 
 						current_page->read_bytes, 
 						current_page->ofs); 
 				 }
-
 				else
 				{
 					swap_write (index, frame_table[clock_hand].page);
 					set_in_swap (current_page->meta);
 				}
-
-
 			}
 			// clear page and update frame, supplemental page table, pagedir
 			frame_clear_page (clock_hand, pd);

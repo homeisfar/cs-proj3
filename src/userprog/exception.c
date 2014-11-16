@@ -164,9 +164,11 @@ page_fault (struct intr_frame *f)
   struct thread *t = thread_current ();
   void *fault_addr_rounded = pg_round_down (fault_addr);
 
+  /* Look up the Supp Page Table for an entry to lazy load */
   page_entry *fault_entry = page_get_entry (&t->page_table_hash, fault_addr_rounded);
   
-  // Stack Growth
+  /* Begin by checking to see if a page exists in the supp page table.
+     If not, but the address is valid, grow the stack */
   if (!fault_entry) 
   {
     uintptr_t *esp = t->esp ? (uintptr_t) t->esp : (uintptr_t) f->esp;
@@ -177,7 +179,8 @@ page_fault (struct intr_frame *f)
       kpage = frame_get_stack_page (fault_addr);
       if (kpage != NULL)
       {
-        success = pagedir_set_page (t->pagedir, pg_round_down (fault_addr), kpage, true);
+        success = pagedir_set_page (t->pagedir, 
+          pg_round_down (fault_addr), kpage, true);
         if (success)
           return;
       }
@@ -185,6 +188,7 @@ page_fault (struct intr_frame *f)
     kill (f);
   }
   
+  /* If the access is actually a write to read only memory, kill the process */
   bool writeable = is_writeable (fault_entry->meta) ? true : false;
 
   if (!writeable && write)
@@ -193,19 +197,19 @@ page_fault (struct intr_frame *f)
   if (!frame_get_page (t->pagedir, fault_addr_rounded, writeable, fault_entry))
     kill (f);
 
-  //check if it's in swap
+  /* If the process hasn't been killed yet, time to check swap space. */
   else if (is_in_swap (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
       if (kpage == NULL)
         kill (f);
 
-      //time to load the page
+      /* Load page in from swap */
       swap_read (fault_entry->swap_index, fault_entry->phys_page);
       clear_in_swap (fault_entry->meta);
       set_in_frame (fault_entry->meta);
   }
-  //check if it's in FS after swap
+  /* The entry didn't come from swap, so it must be in the FS */
   else if (is_in_fs (fault_entry->meta) || is_mmap (fault_entry->meta))
   {
       uint8_t *kpage = fault_entry->phys_page;
@@ -214,10 +218,13 @@ page_fault (struct intr_frame *f)
           
       /* Load this page. */
       file_seek (fault_entry->f, fault_entry->ofs);
-      if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != (int) fault_entry->read_bytes)
+      if (file_read (fault_entry->f, kpage, fault_entry->read_bytes) != 
+         (int) fault_entry->read_bytes)
         kill (f); 
       memset (kpage + fault_entry->read_bytes, 0, fault_entry->zero_bytes);
   } 
+  /* If we still cannot find the file, something has gone very wrong. 
+     Kill the process */
   else
     kill (f);
 }

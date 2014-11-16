@@ -21,6 +21,7 @@ page_less (const struct hash_elem *a_, const struct hash_elem *b_,
   return a->upage < b->upage;
 }
 
+/* Retrieve an entry from our supp page hash */
 page_entry *
 page_get_entry (struct hash *page_table, void *fault_addr)
 {
@@ -30,7 +31,7 @@ page_get_entry (struct hash *page_table, void *fault_addr)
   return elem ? hash_entry (elem, page_entry, page_elem) : NULL;
 }
 
-
+/* Insert a page into the supp table if it's an executable */
 struct hash_elem *
 page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
         uint32_t read_bytes, uint32_t zero_bytes, bool writable)
@@ -51,6 +52,7 @@ page_insert_entry_exec (struct file *file, off_t ofs, uint8_t *upage,
     return hash_insert (pages, &page_entry_supp->page_elem);
 }
 
+/* Insert a page into the supp table if it's a stack page */
 struct hash_elem *
 page_insert_entry_stack (uint8_t *upage)
 {
@@ -64,7 +66,8 @@ page_insert_entry_stack (uint8_t *upage)
     return hash_insert (&pages, &page_entry_supp->page_elem);
 }
 
-/* For mmap data, we recycle read_bytes to record file size */
+/* For mmap data, we recycle read_bytes from the supp page struct
+   to record file size */
 struct hash_elem *
 page_insert_entry_mmap (uint8_t *upage, struct file *file, off_t file_ofs, 
                         off_t size, bool final)
@@ -83,6 +86,7 @@ page_insert_entry_mmap (uint8_t *upage, struct file *file, off_t file_ofs,
     return hash_insert (&pages, &page_entry_supp->page_elem);
 }
 
+/* Removes an entry from the supp page hash */
 struct hash_elem *
 page_remove_entry (struct hash_elem *page_elem)
 {
@@ -91,6 +95,7 @@ page_remove_entry (struct hash_elem *page_elem)
     return hash_delete (&pages, page_elem);
 }
 
+/* Removes an entry from the supp page hash based on an address */
 struct hash_elem *
 page_remove_address (void *addr)
 {
